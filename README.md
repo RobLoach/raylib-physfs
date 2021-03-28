@@ -16,7 +16,7 @@ Integrate the virtual file system [PhysicsFS](https://icculus.org/physfs/) with 
 
 ## Usage
 
-This is a single-file header. To use it, define `RAYLIB_PHYSFS_IMPLEMENTATION` in one `.c` source files before including [`raylib-physfs.h`](include/raylib-physfs.h). You will also have to link the PhysFS and raylib dependencies.
+This is a single-file header. To use it, define `RAYLIB_PHYSFS_IMPLEMENTATION` in one `.c` source file before including [`raylib-physfs.h`](include/raylib-physfs.h). You will also have to link the PhysFS and raylib dependencies.
 
 ### Example
 
