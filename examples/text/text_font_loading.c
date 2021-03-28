@@ -11,10 +11,10 @@
 *     - XNA Spritefont > Sprite font image, following XNA Spritefont conventions,
 *                 Characters in image must follow some spacing and order rules
 *
-*   This example has been created using raylib 2.6 (www.raylib.com)
-*   raylib is licensed under an unmodified zlib/libpng license (View raylib.h for details)
+*   This example has been created using raylib-physfs 0.0.2 (https://github.com/RobLoach/raylib-physfs)
+*   raylib-physfs is licensed under an unmodified zlib/libpng license (View raylib-physfs.h for details)
 *
-*   Copyright (c) 2016-2019 Ramon Santamaria (@raysan5)
+*   Copyright (c) 2021 Rob Loach (@RobLoach)
 *
 ********************************************************************************************/
 

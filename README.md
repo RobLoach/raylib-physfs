@@ -5,10 +5,10 @@ Integrate the virtual file system [PhysFS](https://icculus.org/physfs/) with [ra
 ## Features
 
 - Load the following data from archives
-    - Font
-    - Music
-    - Wave
-    - Image
+    - Font with `LoadFontFromPhysFS()`
+    - Music with `LoadMusicStreamFromPhysFS()`
+    - Wave with `LoadWaveFromPhysFS()`
+    - Image with `LoadImageFromPhysFS()`
 - Enumerate across multiple archives and mount paths
 - Check if directories and files exist
 - Register the file loading API callbacks with PhysFS
@@ -62,4 +62,4 @@ Font LoadFontFromPhysFS(const char* fileName, int fontSize, int *fontChars, int 
 
 ## License
 
-raylib-cpp is licensed under an unmodified zlib/libpng license, which is an OSI-certified, BSD-like license that allows static linking with closed source software. Check [LICENSE](LICENSE) for further details.
+raylib-physfs is licensed under an unmodified zlib/libpng license, which is an OSI-certified, BSD-like license that allows static linking with closed source software. Check [LICENSE](LICENSE) for further details.
