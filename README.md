@@ -1,6 +1,6 @@
 # raylib-physfs
 
-Integrate the virtual file system [PhysFS](https://icculus.org/physfs/) with [raylib](https://www.raylib.com/), allowing to load images, audio and fonts from data archives.
+Integrate the virtual file system [PhysicsFS](https://icculus.org/physfs/) with [raylib](https://www.raylib.com/), allowing to load images, audio and fonts from data archives.
 
 ## Features
 
