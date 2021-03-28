@@ -9,6 +9,7 @@ Integrate the virtual file system [PhysicsFS](https://icculus.org/physfs/) with 
     - Music with `LoadMusicStreamFromPhysFS()`
     - Wave with `LoadWaveFromPhysFS()`
     - Image with `LoadImageFromPhysFS()`
+    - Text with `LoadFileTextFromPhysFS()`
 - Enumerate across multiple archives and mount paths
 - Check if directories and files exist
 - Register the file loading API callbacks with PhysFS
