@@ -46,12 +46,12 @@ bool InitPhysFS();                                              // Initialize th
 bool ClosePhysFS();                                             // Close the PhysFS file system
 bool MountPhysFS(const char* newDir, const char* mountPoint);   // Mount the given directory at a mount point
 bool UnmountPhysFS(const char* oldDir);                         // Unmounts the given directory
-bool FileExistsFromPhysFS(const char* fileName);                // Check if the given file exists in PhysFS
-bool DirectoryExistsFromPhysFS(const char* dirPath);            // Check if the given directory exists in PhysFS
+bool FileExistsInPhysFS(const char* fileName);                  // Check if the given file exists in PhysFS
+bool DirectoryExistsInPhysFS(const char* dirPath);              // Check if the given directory exists in PhysFS
 unsigned char* LoadFileDataFromPhysFS(const char* fileName, unsigned int* bytesRead); // Load a data buffer from PhysFS (memory should be freed)
 char* LoadFileTextFromPhysFS(const char* fileName);             // Load text from a file (memory should be freed)
-void SaveFileDataInPhysFS(const char* fileName, void* data, unsigned int bytesToWrite); // Save the given file data in PhysFS
-void SaveFileTextInPhysFS(const char* fileName, char* text);    // Save the given file text in PhysFS
+void SaveFileDataToPhysFS(const char* fileName, void* data, unsigned int bytesToWrite); // Save the given file data in PhysFS
+void SaveFileTextToPhysFS(const char* fileName, char* text);    // Save the given file text in PhysFS
 void SetPhysFSDataCallbacks();                                  // Register all the PhysFS load/save file callbacks
 char** GetDirectoryFilesFromPhysFS(const char* dirPath, int* count); // Get filenames in a directory path (memory should be freed)
 void ClearDirectoryFilesFromPhysFS(char** files);               // Clear directory files paths buffers (free memory)

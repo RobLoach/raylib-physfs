@@ -43,12 +43,12 @@ bool InitPhysFS();                                              // Initialize th
 bool ClosePhysFS();                                             // Close the PhysFS file system
 bool MountPhysFS(const char* newDir, const char* mountPoint);   // Mount the given directory at a mount point
 bool UnmountPhysFS(const char* oldDir);                         // Unmounts the given directory
-bool FileExistsFromPhysFS(const char* fileName);                // Check if the given file exists in PhysFS
-bool DirectoryExistsFromPhysFS(const char* dirPath);            // Check if the given directory exists in PhysFS
+bool FileExistsInPhysFS(const char* fileName);                  // Check if the given file exists in PhysFS
+bool DirectoryExistsInPhysFS(const char* dirPath);              // Check if the given directory exists in PhysFS
 unsigned char* LoadFileDataFromPhysFS(const char* fileName, unsigned int* bytesRead); // Load a data buffer from PhysFS (memory should be freed)
 char* LoadFileTextFromPhysFS(const char* fileName);             // Load text from a file (memory should be freed)
-void SaveFileDataInPhysFS(const char* fileName, void* data, unsigned int bytesToWrite); // Save the given file data in PhysFS
-void SaveFileTextInPhysFS(const char* fileName, char* text);    // Save the given file text in PhysFS
+void SaveFileDataToPhysFS(const char* fileName, void* data, unsigned int bytesToWrite); // Save the given file data in PhysFS
+void SaveFileTextToPhysFS(const char* fileName, char* text);    // Save the given file text in PhysFS
 void SetPhysFSDataCallbacks();                                  // Register all the PhysFS load/save file callbacks
 char** GetDirectoryFilesFromPhysFS(const char* dirPath, int* count); // Get filenames in a directory path (memory should be freed)
 void ClearDirectoryFilesFromPhysFS(char** files);               // Clear directory files paths buffers (free memory)
@@ -67,14 +67,14 @@ Font LoadFontFromPhysFS(const char* fileName, int fontSize, int *fontChars, int 
 void PhysFSReportError(const char* detail) {
     int errorCode = PHYSFS_getLastErrorCode();
     if (errorCode == PHYSFS_ERR_OK) {
-        TraceLog(LOG_DEBUG, TextFormat("PHYSFS: No error reported by PhysFS - %s", detail));
+        TraceLog(LOG_DEBUG, TextFormat("PHYSFS: No error reported - %s", detail));
     } else {
         TraceLog(LOG_ERROR, TextFormat("PHYSFS: %s %s", PHYSFS_getErrorByCode(errorCode), detail));
     }
 }
 
 unsigned char* LoadFileDataFromPhysFS(const char* fileName, unsigned int* bytesRead) {
-    if (!FileExistsFromPhysFS(fileName)) {
+    if (!FileExistsInPhysFS(fileName)) {
         TraceLog(LOG_ERROR, TextFormat("PHYSFS: The file to load doesn't exist: %s.", fileName));
         return 0;
     }
@@ -134,11 +134,11 @@ bool UnmountPhysFS(const char* oldDir) {
     return true;
 }
 
-bool FileExistsFromPhysFS(const char* fileName) {
+bool FileExistsInPhysFS(const char* fileName) {
     return PHYSFS_exists(fileName) != 0;
 }
 
-bool DirectoryExistsFromPhysFS(const char* dirPath) {
+bool DirectoryExistsInPhysFS(const char* dirPath) {
     PHYSFS_Stat stat;
     if (PHYSFS_stat(dirPath, &stat) == 0) {
         return false;
@@ -211,7 +211,7 @@ Font LoadFontFromPhysFS(const char* fileName, int fontSize, int *fontChars, int 
     return font;
 }
 
-void SaveFileDataInPhysFS(const char* fileName, void* data, unsigned int bytesToWrite) {
+void SaveFileDataToPhysFS(const char* fileName, void* data, unsigned int bytesToWrite) {
     void* handle = PHYSFS_openWrite(fileName);
     if (handle == 0) {
         PhysFSReportError(fileName);
@@ -219,18 +219,19 @@ void SaveFileDataInPhysFS(const char* fileName, void* data, unsigned int bytesTo
     }
 
     if (PHYSFS_writeBytes(handle, data, bytesToWrite) < 0) {
+        PHYSFS_close(handle);
         PhysFSReportError(fileName);
+    } else {
+        PHYSFS_close(handle);
     }
-
-    PHYSFS_close(handle);
 }
 
-void SaveFileTextInPhysFS(const char* fileName, char* text) {
-    SaveFileDataInPhysFS(fileName, text, TextLength(text));
+void SaveFileTextToPhysFS(const char* fileName, char* text) {
+    SaveFileDataToPhysFS(fileName, text, TextLength(text));
 }
 
 char** GetDirectoryFilesFromPhysFS(const char* dirPath, int *count) {
-    if (!DirectoryExistsFromPhysFS(dirPath)) {
+    if (!DirectoryExistsInPhysFS(dirPath)) {
         TraceLog(LOG_ERROR, "PHYSFS: Can't get directory files from non-existant directory %s", dirPath);
         return 0;
     }
@@ -249,9 +250,10 @@ void ClearDirectoryFilesFromPhysFS(char** files) {
 
 void SetPhysFSDataCallbacks() {
     SetLoadFileDataCallback(LoadFileDataFromPhysFS);
-    SetSaveFileDataCallback(SaveFileDataInPhysFS);
+    SetSaveFileDataCallback(SaveFileDataToPhysFS);
     SetLoadFileTextCallback(LoadFileTextFromPhysFS);
-    SetSaveFileTextCallback(SaveFileTextInPhysFS);
+    SetSaveFileTextCallback(SaveFileTextToPhysFS);
+    TraceLog(LOG_DEBUG, "PHYSFS: Set all PhysFS load/save callbacks");
 }
 
 bool ClosePhysFS() {

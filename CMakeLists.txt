@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.11)
 project (raylib-physfs
-    VERSION 0.0.2
+    VERSION 1.0.0
     DESCRIPTION "raylib-physfs"
     HOMEPAGE_URL "https://github.com/robloach/raylib-physfs"
     LANGUAGES C)
