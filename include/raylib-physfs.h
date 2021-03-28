@@ -258,7 +258,7 @@ void SetPhysFSDataCallbacks() {
 
 bool ClosePhysFS() {
     if (PHYSFS_deinit() == 0) {
-        PhysFSReportError("");
+        PhysFSReportError("ClosePhysFS() unsuccessful");
         return false;
     }
     TraceLog(LOG_DEBUG, "PHYSFS: Closed successfully");
