@@ -60,6 +60,20 @@ Music LoadMusicStreamFromPhysFS(const char* fileName);          // Load music da
 Font LoadFontFromPhysFS(const char* fileName, int fontSize, int *fontChars, int charsCount); // Load a font from PhysFS
 ```
 
+## Development
+
+To build the examples locally, use [cmake](https://cmake.org/).
+
+``` bash
+git submodule update --init
+mkdir build
+cd build
+cmake ..
+make
+cd examples
+./textures_image_loading
+```
+
 ## License
 
 raylib-physfs is licensed under an unmodified zlib/libpng license, which is an OSI-certified, BSD-like license that allows static linking with closed source software. Check [LICENSE](LICENSE) for further details.
