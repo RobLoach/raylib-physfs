@@ -23,17 +23,15 @@ int main(void)
     const int screenWidth = 800;
     const int screenHeight = 450;
 
-    InitWindow(screenWidth, screenHeight, "raylib [textures] example - image loading");
+    InitWindow(screenWidth, screenHeight, "raylib [text] example - basic loading");
 
     // Initialize the file system, and mount a directory.
     InitPhysFS();
     MountPhysFS("resources", "res");
 
     // Load the image from PhysFS.
-    Image image = LoadImageFromPhysFS("res/raylib_logo.png");     // Loaded in CPU memory (RAM)
-    Texture2D texture = LoadTextureFromImage(image);          // Image converted to texture, GPU memory (VRAM)
+    char* text = LoadFileTextFromPhysFS("res/helloworld.txt");
 
-    UnloadImage(image);   // Once image has been converted to texture and uploaded to VRAM, it can be unloaded from RAM
     //---------------------------------------------------------------------------------------
 
     // Main game loop
@@ -50,9 +48,7 @@ int main(void)
 
             ClearBackground(RAYWHITE);
 
-            DrawTexture(texture, screenWidth/2 - texture.width/2, screenHeight/2 - texture.height/2, WHITE);
-
-            DrawText("this IS a texture loaded from an image!", 300, 370, 10, GRAY);
+            DrawText(text, 100, 50, 30, GRAY);
 
         EndDrawing();
         //----------------------------------------------------------------------------------
@@ -60,7 +56,7 @@ int main(void)
 
     // De-Initialization
     //--------------------------------------------------------------------------------------
-    UnloadTexture(texture);       // Texture unloading
+    UnloadFileText(text);
 
     ClosePhysFS();
     CloseWindow();                // Close window and OpenGL context

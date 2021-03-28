@@ -1,5 +1,5 @@
 # Get the sources together
-set(example_dirs textures)
+set(example_dirs audio text textures)
 set(example_sources)
 set(example_resources)
 
@@ -11,10 +11,11 @@ if (NOT raylib_FOUND)
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../vendor/raylib ${CMAKE_CURRENT_SOURCE_DIR}/../vendor/raylib)
 endif()
 
-# physfs
+# PhysFS
 set(PHYSFS_BUILD_STATIC ON CACHE BOOL "TRUE" FORCE)
 set(PHYSFS_BUILD_SHARED OFF CACHE BOOL "" FORCE)
 set(PTHREAD_LIBRARY OFF CACHE BOOL "" FORCE)
+set(PHYSFS_ARCHIVE_ZIP OFF CACHE BOOL "" FORCE)
 set(PHYSFS_ARCHIVE_7Z OFF CACHE BOOL "" FORCE)
 set(PHYSFS_ARCHIVE_GRP OFF CACHE BOOL "" FORCE)
 set(PHYSFS_ARCHIVE_WAD OFF CACHE BOOL "" FORCE)

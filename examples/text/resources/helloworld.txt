@@ -1,0 +1,3 @@
+Hello, World!
+
+This is loaded from a text file.

@@ -1,13 +1,11 @@
 /*******************************************************************************************
 *
-*   raylib [textures] example - Image loading and texture creation
+*   raylib [audio] example - Sound loading and playing
 *
-*   NOTE: Images are loaded in CPU memory (RAM); textures are loaded in GPU memory (VRAM)
-*
-*   This example has been created using raylib 1.3 (www.raylib.com)
+*   This example has been created using raylib 1.0 (www.raylib.com)
 *   raylib is licensed under an unmodified zlib/libpng license (View raylib.h for details)
 *
-*   Copyright (c) 2015 Ramon Santamaria (@raysan5)
+*   Copyright (c) 2014 Ramon Santamaria (@raysan5)
 *
 ********************************************************************************************/
 
@@ -23,25 +21,29 @@ int main(void)
     const int screenWidth = 800;
     const int screenHeight = 450;
 
-    InitWindow(screenWidth, screenHeight, "raylib [textures] example - image loading");
+    InitWindow(screenWidth, screenHeight, "raylib [audio] example - sound loading and playing");
 
-    // Initialize the file system, and mount a directory.
-    InitPhysFS();
+    InitAudioDevice();      // Initialize audio device
+
+    InitPhysFS();           // Initialize PhysFS
     MountPhysFS("resources", "res");
 
-    // Load the image from PhysFS.
-    Image image = LoadImageFromPhysFS("res/raylib_logo.png");     // Loaded in CPU memory (RAM)
-    Texture2D texture = LoadTextureFromImage(image);          // Image converted to texture, GPU memory (VRAM)
+    Wave wav = LoadWaveFromPhysFS("res/sound.wav");
+    Wave ogg = LoadWaveFromPhysFS("res/target.ogg");
 
-    UnloadImage(image);   // Once image has been converted to texture and uploaded to VRAM, it can be unloaded from RAM
-    //---------------------------------------------------------------------------------------
+    Sound fxWav = LoadSoundFromWave(wav);         // Load WAV audio file
+    Sound fxOgg = LoadSoundFromWave(ogg);        // Load OGG audio file
+
+    SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
+    //--------------------------------------------------------------------------------------
 
     // Main game loop
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
         // Update
         //----------------------------------------------------------------------------------
-        // TODO: Update your variables here
+        if (IsKeyPressed(KEY_SPACE)) PlaySound(fxWav);      // Play WAV sound
+        if (IsKeyPressed(KEY_ENTER)) PlaySound(fxOgg);      // Play OGG sound
         //----------------------------------------------------------------------------------
 
         // Draw
@@ -50,9 +52,8 @@ int main(void)
 
             ClearBackground(RAYWHITE);
 
-            DrawTexture(texture, screenWidth/2 - texture.width/2, screenHeight/2 - texture.height/2, WHITE);
-
-            DrawText("this IS a texture loaded from an image!", 300, 370, 10, GRAY);
+            DrawText("Press SPACE to PLAY the WAV sound!", 200, 180, 20, LIGHTGRAY);
+            DrawText("Press ENTER to PLAY the OGG sound!", 200, 220, 20, LIGHTGRAY);
 
         EndDrawing();
         //----------------------------------------------------------------------------------
@@ -60,10 +61,16 @@ int main(void)
 
     // De-Initialization
     //--------------------------------------------------------------------------------------
-    UnloadTexture(texture);       // Texture unloading
+    UnloadWave(wav);
+    UnloadWave(ogg);
+    UnloadSound(fxWav);     // Unload sound data
+    UnloadSound(fxOgg);     // Unload sound data
 
-    ClosePhysFS();
-    CloseWindow();                // Close window and OpenGL context
+    ClosePhysFS();          // Close PhysFS
+
+    CloseAudioDevice();     // Close audio device
+
+    CloseWindow();          // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 
     return 0;
