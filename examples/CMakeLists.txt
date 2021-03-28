@@ -13,11 +13,23 @@ endif()
 
 # physfs
 set(PHYSFS_BUILD_STATIC ON CACHE BOOL "TRUE" FORCE)
+set(PHYSFS_BUILD_SHARED OFF CACHE BOOL "" FORCE)
+set(PTHREAD_LIBRARY OFF CACHE BOOL "" FORCE)
+set(PHYSFS_ARCHIVE_7Z OFF CACHE BOOL "" FORCE)
+set(PHYSFS_ARCHIVE_GRP OFF CACHE BOOL "" FORCE)
+set(PHYSFS_ARCHIVE_WAD OFF CACHE BOOL "" FORCE)
+set(PHYSFS_ARCHIVE_HOG OFF CACHE BOOL "" FORCE)
+set(PHYSFS_ARCHIVE_MVL OFF CACHE BOOL "" FORCE)
+set(PHYSFS_ARCHIVE_QPAK OFF CACHE BOOL "" FORCE)
+set(PHYSFS_ARCHIVE_SLB OFF CACHE BOOL "" FORCE)
+set(PHYSFS_ARCHIVE_ISO9660 OFF CACHE BOOL "" FORCE)
+set(PHYSFS_ARCHIVE_VDF OFF CACHE BOOL "" FORCE)
+set(PHYSFS_BUILD_TEST OFF CACHE BOOL "" FORCE)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../vendor/physfs ${CMAKE_CURRENT_SOURCE_DIR}/../vendor/physfs)
 
 # Find all examples
 foreach(example_dir ${example_dirs})
-    file(GLOB sources ${example_dir}/*.cpp)
+    file(GLOB sources ${example_dir}/*.c)
     list(APPEND example_sources ${sources})
 
     # Any any resources
@@ -35,7 +47,7 @@ foreach(example_source ${example_sources})
     add_executable(${example_name} ${example_source})
 
     # Link raylib and raylib-cpp
-    target_link_libraries(${example_name} PUBLIC raylib physfs-static)
+    target_link_libraries(${example_name} PUBLIC raylib physfs-static raylib-physfs)
 
     string(REGEX MATCH ".*/.*/" resources_dir ${example_source})
     string(APPEND resources_dir "resources")
