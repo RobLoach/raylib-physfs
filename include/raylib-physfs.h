@@ -63,6 +63,8 @@ Font LoadFontFromPhysFS(const char* fileName, int fontSize, int *fontChars, int 
 
 /**
  * Reports the last PhysFS error to the raylib TraceLog.
+ *
+ * @param detail Any additional detail to append to the reported error.
  */
 void PhysFSReportError(const char* detail) {
     int errorCode = PHYSFS_getLastErrorCode();
@@ -73,6 +75,16 @@ void PhysFSReportError(const char* detail) {
     }
 }
 
+/**
+ * Loads the given file as a byte array from PhysFS (read).
+ *
+ * @param fileName The file to load.
+ * @param bytesRead An unsigned integer to save the bytes that were read.
+ *
+ * @return The file data as a pointer. Make sure to use UnloadFileData() when finished using the file data.
+ *
+ * @see UnloadFileData()
+ */
 unsigned char* LoadFileDataFromPhysFS(const char* fileName, unsigned int* bytesRead) {
     if (!FileExistsInPhysFS(fileName)) {
         TraceLog(LOG_ERROR, TextFormat("PHYSFS: The file to load doesn't exist: %s.", fileName));
@@ -258,7 +270,7 @@ void SetPhysFSDataCallbacks() {
 
 bool ClosePhysFS() {
     if (PHYSFS_deinit() == 0) {
-        PhysFSReportError("");
+        PhysFSReportError("ClosePhysFS()");
         return false;
     }
     TraceLog(LOG_DEBUG, "PHYSFS: Closed successfully");
