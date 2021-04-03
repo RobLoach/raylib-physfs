@@ -25,11 +25,11 @@ int main(void)
 
     // Initialize the file system, and mount a directory.
     InitPhysFS();
-    MountPhysFS("resources", "res");
+    MountPhysFS("resources", "");
 
     InitAudioDevice();              // Initialize audio device
 
-    Music music = LoadMusicStreamFromPhysFS("res/country.mp3");
+    Music music = LoadMusicStreamFromPhysFS("country.mp3");
 
     PlayMusicStream(music);
 

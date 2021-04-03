@@ -5,18 +5,18 @@ Integrate the virtual file system [PhysicsFS](https://icculus.org/physfs/) with 
 ## Features
 
 - Load the following data from archives
-    - Font with `LoadFontFromPhysFS()`
+    - Image with `LoadImageFromPhysFS()`
     - Music with `LoadMusicStreamFromPhysFS()`
     - Wave with `LoadWaveFromPhysFS()`
-    - Image with `LoadImageFromPhysFS()`
+    - Font with `LoadFontFromPhysFS()`
     - Text with `LoadFileTextFromPhysFS()`
-- Enumerate across multiple archives and mount paths
 - Check if directories and files exist
-- Register the file loading API callbacks with PhysFS
+- Enumerate across multiple archives and mount paths
+- Save files through PhysFS
 
 ## Usage
 
-This is a single-file header. To use it, define `RAYLIB_PHYSFS_IMPLEMENTATION` in one `.c` source files before including [`raylib-physfs.h`](include/raylib-physfs.h). You will also have to link the PhysFS and raylib dependencies.
+This is a single-file header. To use it, define `RAYLIB_PHYSFS_IMPLEMENTATION` in one `.c` source file before including [`raylib-physfs.h`](include/raylib-physfs.h). You will also have to link the PhysFS and raylib dependencies.
 
 ### Example
 
@@ -42,28 +42,31 @@ int main() {
 ### Cheatsheet
 
 ``` c
-bool InitPhysFS();                                              // Initialize the PhysFS file system
-bool ClosePhysFS();                                             // Close the PhysFS file system
-bool MountPhysFS(const char* newDir, const char* mountPoint);   // Mount the given directory at a mount point
-bool UnmountPhysFS(const char* oldDir);                         // Unmounts the given directory
-bool FileExistsInPhysFS(const char* fileName);                  // Check if the given file exists in PhysFS
-bool DirectoryExistsInPhysFS(const char* dirPath);              // Check if the given directory exists in PhysFS
-unsigned char* LoadFileDataFromPhysFS(const char* fileName, unsigned int* bytesRead); // Load a data buffer from PhysFS (memory should be freed)
-char* LoadFileTextFromPhysFS(const char* fileName);             // Load text from a file (memory should be freed)
-void SaveFileDataToPhysFS(const char* fileName, void* data, unsigned int bytesToWrite); // Save the given file data in PhysFS
-void SaveFileTextToPhysFS(const char* fileName, char* text);    // Save the given file text in PhysFS
-void SetPhysFSDataCallbacks();                                  // Register all the PhysFS load/save file callbacks
+bool InitPhysFS();                                             // Initialize the PhysFS file system
+bool ClosePhysFS();                                            // Close the PhysFS file system
+bool IsPhysFSReady();                                          // Check if PhysFS has been initialized successfully
+bool MountPhysFS(const char* newDir, const char* mountPoint);  // Mount the given directory at a mount point
+bool MountPhysFSFromMemory(const unsigned char *fileData, int dataSize, const char* newDir, const char* mountPoint);  // Mount the given file data as a mount point.
+bool UnmountPhysFS(const char* oldDir);                        // Unmounts the given directory
+bool FileExistsInPhysFS(const char* fileName);                 // Check if the given file exists in PhysFS
+bool DirectoryExistsInPhysFS(const char* dirPath);             // Check if the given directory exists in PhysFS
+unsigned char* LoadFileDataFromPhysFS(const char* fileName, unsigned int* bytesRead);  // Load a data buffer from PhysFS (memory should be freed)
+char* LoadFileTextFromPhysFS(const char* fileName);            // Load text from a file (memory should be freed)
+bool SetPhysFSWriteDirectory(const char* newDir);              // Set the base directory where PhysFS should write files to.
+bool SaveFileDataToPhysFS(const char* fileName, void* data, unsigned int bytesToWrite);  // Save the given file data in PhysFS
+bool SaveFileTextToPhysFS(const char* fileName, char* text);   // Save the given file text in PhysFS
 char** GetDirectoryFilesFromPhysFS(const char* dirPath, int* count); // Get filenames in a directory path (memory should be freed)
-void ClearDirectoryFilesFromPhysFS(char** files);               // Clear directory files paths buffers (free memory)
-Image LoadImageFromPhysFS(const char* file);                    // Load an image from PhysFS
-Wave LoadWaveFromPhysFS(const char* fileName);                  // Load wave data from PhysFS
-Music LoadMusicStreamFromPhysFS(const char* fileName);          // Load music data from PhysFS
-Font LoadFontFromPhysFS(const char* fileName, int fontSize, int *fontChars, int charsCount); // Load a font from PhysFS
+void ClearDirectoryFilesFromPhysFS(char** files);              // Clear directory files paths buffers (free memory)
+long GetFileModTimeFromPhysFS(const char* fileName);           // Get file modification time (last write time) from PhysFS.
+Image LoadImageFromPhysFS(const char* file);                   // Load an image from PhysFS
+Wave LoadWaveFromPhysFS(const char* fileName);                 // Load wave data from PhysFS
+Music LoadMusicStreamFromPhysFS(const char* fileName);         // Load music data from PhysFS
+Font LoadFontFromPhysFS(const char* fileName, int fontSize, int *fontChars, int charsCount);  // Load a font from PhysFS
 ```
 
 ## Development
 
-To build the examples locally, use [cmake](https://cmake.org/).
+To build the examples locally, and run tests, use [cmake](https://cmake.org/).
 
 ``` bash
 git submodule update --init
@@ -71,6 +74,7 @@ mkdir build
 cd build
 cmake ..
 make
+make test
 cd examples
 ./textures_image_loading
 ```
