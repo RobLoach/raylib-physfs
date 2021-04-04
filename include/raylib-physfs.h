@@ -61,6 +61,8 @@ Music LoadMusicStreamFromPhysFS(const char* fileName);         // Load music dat
 Font LoadFontFromPhysFS(const char* fileName, int fontSize, int *fontChars, int charsCount);  // Load a font from PhysFS
 
 #ifdef RAYLIB_PHYSFS_IMPLEMENTATION
+#ifndef RAYLIB_PHYSFS_IMPLEMENTATION_ONCE
+#define RAYLIB_PHYSFS_IMPLEMENTATION_ONCE
 
 #include "physfs.h" // NOLINT
 
@@ -511,7 +513,8 @@ bool ClosePhysFS() {
     return true;
 }
 
-#endif
+#endif  // RAYLIB_PHYSFS_IMPLEMENTATION_ONCE
+#endif  // RAYLIB_PHYSFS_IMPLEMENTATION
 
 #ifdef __cplusplus
 }
