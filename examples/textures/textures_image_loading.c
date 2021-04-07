@@ -29,11 +29,8 @@ int main(void)
     InitPhysFS();
     MountPhysFS("resources", "res");
 
-    // Load the image from PhysFS.
-    Image image = LoadImageFromPhysFS("res/raylib_logo.png");     // Loaded in CPU memory (RAM)
-    Texture2D texture = LoadTextureFromImage(image);          // Image converted to texture, GPU memory (VRAM)
-
-    UnloadImage(image);   // Once image has been converted to texture and uploaded to VRAM, it can be unloaded from RAM
+    // Load the image directly into a texture through PhysFS.
+    Texture2D texture = LoadTextureFromPhysFS("res/raylib_logo.png");
     //---------------------------------------------------------------------------------------
 
     // Main game loop
