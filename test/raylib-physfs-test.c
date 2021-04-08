@@ -40,6 +40,9 @@ int main(int argc, char *argv[]) {
         assert(fileData);
         assert(bytesRead > 0);
         UnloadFileData(fileData);
+
+        unsigned char* missingFileData = LoadFileDataFromPhysFS("MissingFile.txt", bytesRead);
+        assert(missingFileData == 0);
     }
 
     // SaveFileDataToPhysFS()
@@ -79,6 +82,9 @@ int main(int argc, char *argv[]) {
         assert(fileText != 0);
         assert(TextIsEqual(fileText, "Hello, World!\n"));
         UnloadFileText(fileText);
+
+        char* missingText = LoadFileTextFromPhysFS("MissingText.txt");
+        assert(missingText == 0);
     }
 
     // LoadImageFromPhysFS()
@@ -99,6 +105,12 @@ int main(int argc, char *argv[]) {
 
         Wave missingWave = LoadWaveFromPhysFS("MissingFile.wav");
         assert(missingWave.data == 0);
+    }
+
+    // LoadShaderFromPhysFS()
+    {
+        Shader missingShader = LoadShaderFromPhysFS("MissingFile.txt", "MissingFile.txt");
+        assert(missingShader.locs == 0);
     }
 
     // GetFileModTimeFromPhysFS()

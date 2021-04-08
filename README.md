@@ -11,6 +11,7 @@ Integrate the virtual file system [PhysicsFS](https://icculus.org/physfs/) with 
     - Waves with `LoadWaveFromPhysFS()`
     - Fonts with `LoadFontFromPhysFS()`
     - Text with `LoadFileTextFromPhysFS()`
+    - Shaders with `LoadShaderFromPhysFS()`
 - Check if directories and files exist
 - Enumerate across multiple archives and mount paths
 - Save files through PhysFS
@@ -64,6 +65,7 @@ Texture2D LoadTextureFromPhysFS(const char* fileName);         // Load a texture
 Wave LoadWaveFromPhysFS(const char* fileName);                 // Load wave data from PhysFS
 Music LoadMusicStreamFromPhysFS(const char* fileName);         // Load music data from PhysFS
 Font LoadFontFromPhysFS(const char* fileName, int fontSize, int *fontChars, int charsCount);  // Load a font from PhysFS
+Shader LoadShaderFromPhysFS(const char *vsFileName, const char *fsFileName); // Load a Shader from PhySFS
 ```
 
 ## Development
