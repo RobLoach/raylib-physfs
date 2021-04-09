@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.11)
 project (raylib-physfs
-    VERSION 1.2.0
+    VERSION 1.2.1
     DESCRIPTION "raylib-physfs"
     HOMEPAGE_URL "https://github.com/robloach/raylib-physfs"
     LANGUAGES C)
@@ -17,7 +17,7 @@ endif()
 # Testing
 include(CTest)
 enable_testing()
-if(BUILD_TESTING)
+if(BUILD_TESTING AND BUILD_RAYLIB_PHYSFS_EXAMPLES)
     set(CTEST_CUSTOM_TESTS_IGNORE
         pkg-config--static
     )

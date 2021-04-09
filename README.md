@@ -44,28 +44,28 @@ int main() {
 ### Cheatsheet
 
 ``` c
-bool InitPhysFS();                                             // Initialize the PhysFS file system
-bool ClosePhysFS();                                            // Close the PhysFS file system
-bool IsPhysFSReady();                                          // Check if PhysFS has been initialized successfully
-bool MountPhysFS(const char* newDir, const char* mountPoint);  // Mount the given directory at a mount point
+bool InitPhysFS();                                              // Initialize the PhysFS file system
+bool ClosePhysFS();                                             // Close the PhysFS file system
+bool IsPhysFSReady();                                           // Check if PhysFS has been initialized successfully
+bool MountPhysFS(const char* newDir, const char* mountPoint);   // Mount the given directory or archive as a mount point
 bool MountPhysFSFromMemory(const unsigned char *fileData, int dataSize, const char* newDir, const char* mountPoint);  // Mount the given file data as a mount point
-bool UnmountPhysFS(const char* oldDir);                        // Unmounts the given directory
-bool FileExistsInPhysFS(const char* fileName);                 // Check if the given file exists in PhysFS
-bool DirectoryExistsInPhysFS(const char* dirPath);             // Check if the given directory exists in PhysFS
+bool UnmountPhysFS(const char* oldDir);                         // Unmounts the given directory
+bool FileExistsInPhysFS(const char* fileName);                  // Check if the given file exists in PhysFS
+bool DirectoryExistsInPhysFS(const char* dirPath);              // Check if the given directory exists in PhysFS
 unsigned char* LoadFileDataFromPhysFS(const char* fileName, unsigned int* bytesRead);  // Load a data buffer from PhysFS (memory should be freed)
-char* LoadFileTextFromPhysFS(const char* fileName);            // Load text from a file (memory should be freed)
-bool SetPhysFSWriteDirectory(const char* newDir);              // Set the base directory where PhysFS should write files to
+char* LoadFileTextFromPhysFS(const char* fileName);             // Load text from a file (memory should be freed)
+bool SetPhysFSWriteDirectory(const char* newDir);               // Set the base directory where PhysFS should write files to (defaults to the current working directory)
 bool SaveFileDataToPhysFS(const char* fileName, void* data, unsigned int bytesToWrite);  // Save the given file data in PhysFS
-bool SaveFileTextToPhysFS(const char* fileName, char* text);   // Save the given file text in PhysFS
+bool SaveFileTextToPhysFS(const char* fileName, char* text);    // Save the given file text in PhysFS
 char** GetDirectoryFilesFromPhysFS(const char* dirPath, int* count);  // Get filenames in a directory path (memory should be freed)
-void ClearDirectoryFilesFromPhysFS(char** files);              // Clear directory files paths buffers (free memory)
-long GetFileModTimeFromPhysFS(const char* fileName);           // Get file modification time (last write time) from PhysFS
-Image LoadImageFromPhysFS(const char* fileName);               // Load an image from PhysFS
-Texture2D LoadTextureFromPhysFS(const char* fileName);         // Load a texture from PhysFS
-Wave LoadWaveFromPhysFS(const char* fileName);                 // Load wave data from PhysFS
-Music LoadMusicStreamFromPhysFS(const char* fileName);         // Load music data from PhysFS
+void ClearDirectoryFilesFromPhysFS(char** filesList);           // Clear directory files paths buffers (free memory)
+long GetFileModTimeFromPhysFS(const char* fileName);            // Get file modification time (last write time) from PhysFS
+Image LoadImageFromPhysFS(const char* fileName);                // Load an image from PhysFS
+Texture2D LoadTextureFromPhysFS(const char* fileName);          // Load a texture from PhysFS
+Wave LoadWaveFromPhysFS(const char* fileName);                  // Load wave data from PhysFS
+Music LoadMusicStreamFromPhysFS(const char* fileName);          // Load music data from PhysFS
 Font LoadFontFromPhysFS(const char* fileName, int fontSize, int *fontChars, int charsCount);  // Load a font from PhysFS
-Shader LoadShaderFromPhysFS(const char *vsFileName, const char *fsFileName); // Load a Shader from PhySFS
+Shader LoadShaderFromPhysFS(const char *vsFileName, const char *fsFileName);  // Load shader from PhysFS.
 ```
 
 ## Development

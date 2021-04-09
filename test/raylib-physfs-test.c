@@ -41,7 +41,7 @@ int main(int argc, char *argv[]) {
         assert(bytesRead > 0);
         UnloadFileData(fileData);
 
-        unsigned char* missingFileData = LoadFileDataFromPhysFS("MissingFile.txt", bytesRead);
+        unsigned char* missingFileData = LoadFileDataFromPhysFS("MissingFile.txt", &bytesRead);
         assert(missingFileData == 0);
     }
 
