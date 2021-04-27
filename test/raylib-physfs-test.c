@@ -125,6 +125,9 @@ int main(int argc, char *argv[]) {
     assert(UnmountPhysFS("resources"));
     assert(!UnmountPhysFS("MissingDirectory"));
 
+    // SetPhysFSCallbacks()
+    SetPhysFSCallbacks();
+
     // ClosePhysFS()
     assert(ClosePhysFS());
 

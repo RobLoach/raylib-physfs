@@ -15,6 +15,7 @@ Integrate the virtual file system [PhysicsFS](https://icculus.org/physfs/) with 
 - Check if directories and files exist
 - Enumerate across multiple archives and mount paths
 - Save files through PhysFS
+- Set all file loading to use PhysFS with `SetPhysFSCallbacks()`
 
 ## Usage
 
@@ -65,7 +66,8 @@ Texture2D LoadTextureFromPhysFS(const char* fileName);          // Load a textur
 Wave LoadWaveFromPhysFS(const char* fileName);                  // Load wave data from PhysFS
 Music LoadMusicStreamFromPhysFS(const char* fileName);          // Load music data from PhysFS
 Font LoadFontFromPhysFS(const char* fileName, int fontSize, int *fontChars, int charsCount);  // Load a font from PhysFS
-Shader LoadShaderFromPhysFS(const char *vsFileName, const char *fsFileName);  // Load shader from PhysFS.
+Shader LoadShaderFromPhysFS(const char *vsFileName, const char *fsFileName);  // Load shader from PhysFS
+void SetPhysFSCallbacks();                                      // Set the raylib file loader/saver callbacks to use PhysFS
 ```
 
 ## Development

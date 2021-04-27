@@ -60,7 +60,8 @@ Texture2D LoadTextureFromPhysFS(const char* fileName);          // Load a textur
 Wave LoadWaveFromPhysFS(const char* fileName);                  // Load wave data from PhysFS
 Music LoadMusicStreamFromPhysFS(const char* fileName);          // Load music data from PhysFS
 Font LoadFontFromPhysFS(const char* fileName, int fontSize, int *fontChars, int charsCount);  // Load a font from PhysFS
-Shader LoadShaderFromPhysFS(const char *vsFileName, const char *fsFileName);  // Load shader from PhysFS.
+Shader LoadShaderFromPhysFS(const char *vsFileName, const char *fsFileName);  // Load shader from PhysFS
+void SetPhysFSCallbacks();                                      // Set the raylib file loader/saver callbacks to use PhysFS
 
 #ifdef __cplusplus
 }
@@ -579,6 +580,21 @@ bool ClosePhysFS() {
     }
     TraceLog(LOG_DEBUG, "PHYSFS: Closed successfully");
     return true;
+}
+
+/**
+ * Sets the raylib file saver/loader callbacks to use PhysFS.
+ *
+ * @see SetLoadFileDataCallback()
+ * @see SetSaveFileDataCallback()
+ * @see SetLoadFileTextCallback()
+ * @see SetSaveFileTextCallback()
+ */
+void SetPhysFSCallbacks() {
+    SetLoadFileDataCallback(LoadFileDataFromPhysFS);
+    SetSaveFileDataCallback(SaveFileDataToPhysFS);
+    SetLoadFileTextCallback(LoadFileTextFromPhysFS);
+    SetSaveFileTextCallback(SaveFileTextToPhysFS);
 }
 
 #ifdef __cplusplus
