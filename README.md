@@ -42,7 +42,7 @@ int main() {
 }
 ```
 
-### Cheatsheet
+### API
 
 ``` c
 bool InitPhysFS();                                              // Initialize the PhysFS file system
@@ -69,6 +69,13 @@ Font LoadFontFromPhysFS(const char* fileName, int fontSize, int *fontChars, int 
 Shader LoadShaderFromPhysFS(const char *vsFileName, const char *fsFileName);  // Load shader from PhysFS
 void SetPhysFSCallbacks();                                      // Set the raylib file loader/saver callbacks to use PhysFS
 ```
+
+### Defines
+
+Add these defines to help shape the behaviour of raylib-physfs...
+
+- `RAYLIB_PHYSFS_IMPLEMENTATION` Define this in one of your `.c`/`.cpp` files prior to including *raylib-physfs.h*
+- `RAYLIB_PHYSFS_STATIC` Use [`static`](https://en.wikipedia.org/wiki/Static_(keyword)) function definitions
 
 ## Development
 
