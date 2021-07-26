@@ -2,3 +2,6 @@
 	path = vendor/raylib
 	url = https://github.com/raysan5/raylib.git
 	ignore = dirty
+[submodule "vendor/physfs"]
+	path = vendor/physfs
+	url = https://github.com/icculus/physfs.git
