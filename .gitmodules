@@ -5,3 +5,4 @@
 [submodule "vendor/physfs"]
 	path = vendor/physfs
 	url = https://github.com/icculus/physfs.git
+	ignore = dirty
