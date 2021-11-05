@@ -5,7 +5,7 @@
 *   Copyright 2021 Rob Loach (@RobLoach)
 *
 *   DEPENDENCIES:
-*       raylib https://www.raylib.com/
+*       raylib 4 https://www.raylib.com/
 *       physfs https://www.icculus.org/physfs/
 *
 *   LICENSE: zlib/libpng
@@ -416,9 +416,9 @@ RAYLIB_PHYSFS_DEF Font LoadFontFromPhysFS(const char* fileName, int fontSize, in
     if (fileData == 0) {
         struct Font output;
         output.baseSize = 0;
-        output.chars = 0;
-        output.charsCount = 0;
-        output.charsPadding = 0;
+        output.glyphCount = 0;
+        output.glyphPadding = 0;
+        output.glyphs = 0;
         output.recs = 0;
         return output;
     }
