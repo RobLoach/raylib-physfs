@@ -1,5 +1,5 @@
 # Get the sources together
-set(example_dirs audio text textures)
+set(example_dirs audio shaders text textures)
 set(example_sources)
 set(example_resources)
 

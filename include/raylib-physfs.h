@@ -99,7 +99,7 @@ extern "C" {
 void TracePhysFSError(const char* detail) {
     int errorCode = PHYSFS_getLastErrorCode();
     if (errorCode == PHYSFS_ERR_OK) {
-        TraceLog(LOG_DEBUG, TextFormat("PHYSFS: No error (%s)", detail));
+        TraceLog(LOG_WARNING, TextFormat("PHYSFS: %s", detail));
     } else {
         const char* errorMessage = PHYSFS_getErrorByCode(errorCode);
         TraceLog(LOG_WARNING, TextFormat("PHYSFS: %s (%s)", errorMessage, detail));
@@ -118,7 +118,8 @@ void TracePhysFSError(const char* detail) {
  */
 RAYLIB_PHYSFS_DEF unsigned char* LoadFileDataFromPhysFS(const char* fileName, unsigned int* bytesRead) {
     if (!FileExistsInPhysFS(fileName)) {
-        TraceLog(LOG_WARNING, TextFormat("PHYSFS: Tried to load unexisting file %s", fileName));
+        TraceLog(LOG_WARNING, TextFormat("PHYSFS: Tried to load unexisting file '%s'", fileName));
+        *bytesRead = 0;
         return 0;
     }
 
@@ -126,27 +127,34 @@ RAYLIB_PHYSFS_DEF unsigned char* LoadFileDataFromPhysFS(const char* fileName, un
     void* handle = PHYSFS_openRead(fileName);
     if (handle == 0) {
         TracePhysFSError(fileName);
+        *bytesRead = 0;
         return 0;
     }
 
     // Check to see how large the file is.
     int size = PHYSFS_fileLength(handle);
     if (size == -1) {
+        *bytesRead = 0;
         PHYSFS_close(handle);
-        TraceLog(LOG_WARNING, TextFormat("PHYSFS: Cannot determine size of file %s", fileName));
+        TraceLog(LOG_WARNING, TextFormat("PHYSFS: Cannot determine size of file '%s'", fileName));
+        return 0;
+    }
+
+    // Close safely when it's empty.
+    if (size == 0) {
+        PHYSFS_close(handle);
+        *bytesRead = 0;
         return 0;
     }
 
     // Read the file, return if it's empty.
     void* buffer = MemAlloc(size);
     int read = PHYSFS_readBytes(handle, buffer, size);
-    if (read <= 0) {
+    if (read < 0) {
+        *bytesRead = 0;
         MemFree(buffer);
         PHYSFS_close(handle);
-        // Only report the error if PhysFS failed to read.
-        if (read == -1) {
-            TracePhysFSError(fileName);
-        }
+        TracePhysFSError(fileName);
         return 0;
     }
 
@@ -203,7 +211,7 @@ RAYLIB_PHYSFS_DEF bool MountPhysFS(const char* newDir, const char* mountPoint) {
         return false;
     }
 
-    TraceLog(LOG_DEBUG, "PHYSFS: Mounted %s at %s", newDir, mountPoint);
+    TraceLog(LOG_DEBUG, "PHYSFS: Mounted '%s' at '%s'", newDir, mountPoint);
     return true;
 }
 
@@ -226,11 +234,11 @@ RAYLIB_PHYSFS_DEF bool MountPhysFSFromMemory(const unsigned char *fileData, int 
     }
 
     if (PHYSFS_mountMemory(fileData, dataSize, 0, newDir, mountPoint, 1) == 0) {
-        TracePhysFSError(TextFormat("Failed to mount %s at %s", newDir, mountPoint));
+        TracePhysFSError(TextFormat("Failed to mount '%s' at '%s'", newDir, mountPoint));
         return false;
     }
 
-    TraceLog(LOG_DEBUG, "PHYSFS: Mounted memory %s at %s", newDir, mountPoint);
+    TraceLog(LOG_DEBUG, "PHYSFS: Mounted memory '%s' at '%s'", newDir, mountPoint);
     return true;
 }
 
@@ -245,11 +253,11 @@ RAYLIB_PHYSFS_DEF bool MountPhysFSFromMemory(const unsigned char *fileData, int 
  */
 RAYLIB_PHYSFS_DEF bool UnmountPhysFS(const char* oldDir) {
     if (PHYSFS_unmount(oldDir) == 0) {
-        TraceLog(LOG_WARNING, "PHYSFS: Failed to unmount directory %s", oldDir);
+        TraceLog(LOG_WARNING, "PHYSFS: Failed to unmount directory '%s'", oldDir);
         return false;
     }
 
-    TraceLog(LOG_DEBUG, "PHYSFS: Unmounted %s", oldDir);
+    TraceLog(LOG_DEBUG, "PHYSFS: Unmounted '%s'", oldDir);
     return true;
 }
 
@@ -297,7 +305,7 @@ RAYLIB_PHYSFS_DEF bool DirectoryExistsInPhysFS(const char* dirPath) {
 RAYLIB_PHYSFS_DEF Image LoadImageFromPhysFS(const char* fileName) {
     unsigned int bytesRead;
     unsigned char* fileData = LoadFileDataFromPhysFS(fileName, &bytesRead);
-    if (fileData == 0) {
+    if (bytesRead == 0) {
         struct Image output;
         output.data = 0;
         output.width = 0;
@@ -362,7 +370,7 @@ RAYLIB_PHYSFS_DEF char* LoadFileTextFromPhysFS(const char *fileName) {
 RAYLIB_PHYSFS_DEF Wave LoadWaveFromPhysFS(const char* fileName) {
     unsigned int bytesRead;
     unsigned char* fileData = LoadFileDataFromPhysFS(fileName, &bytesRead);
-    if (fileData == 0) {
+    if (bytesRead == 0) {
         struct Wave output;
         output.data = 0;
         return output;
@@ -387,7 +395,7 @@ RAYLIB_PHYSFS_DEF Wave LoadWaveFromPhysFS(const char* fileName) {
 RAYLIB_PHYSFS_DEF Music LoadMusicStreamFromPhysFS(const char* fileName) {
     unsigned int bytesRead;
     unsigned char* fileData = LoadFileDataFromPhysFS(fileName, &bytesRead);
-    if (fileData == 0) {
+    if (bytesRead == 0) {
         struct Music output;
         output.ctxData = 0;
         output.stream.buffer = 0;
@@ -413,7 +421,7 @@ RAYLIB_PHYSFS_DEF Music LoadMusicStreamFromPhysFS(const char* fileName) {
 RAYLIB_PHYSFS_DEF Font LoadFontFromPhysFS(const char* fileName, int fontSize, int *fontChars, int charsCount) {
     unsigned int bytesRead;
     unsigned char* fileData = LoadFileDataFromPhysFS(fileName, &bytesRead);
-    if (fileData == 0) {
+    if (bytesRead == 0) {
         struct Font output;
         output.baseSize = 0;
         output.glyphCount = 0;

@@ -31,7 +31,7 @@ int main() {
     // Initiatize the file system.
     InitPhysFS();
 
-    // Mount a directory or archive.
+    // Mount a directory or archive into a given namespace.
     MountPhysFS("assets.zip", "assets");
 
     // Load an image through PhysFS.
@@ -82,6 +82,8 @@ Add these defines to help shape the behaviour of raylib-physfs...
 To build the examples locally, and run tests, use [cmake](https://cmake.org/).
 
 ``` bash
+git clone https://github.com/RobLoach/raylib-physfs.git
+cd raylib-physfs
 git submodule update --init
 mkdir build
 cd build
@@ -94,4 +96,4 @@ cd examples
 
 ## License
 
-raylib-physfs is licensed under an unmodified zlib/libpng license, which is an OSI-certified, BSD-like license that allows static linking with closed source software. Check [LICENSE](LICENSE) for further details.
+*raylib-physfs* is licensed under an unmodified zlib/libpng license, which is an OSI-certified, BSD-like license that allows static linking with closed source software. Check [LICENSE](LICENSE) for further details.
