@@ -53,6 +53,9 @@ foreach(example_source ${example_sources})
     # Link raylib and raylib-cpp
     target_link_libraries(${example_name} PUBLIC raylib physfs-static raylib-physfs)
 
+    # Ensure physfs is included.
+    target_include_directories(${example_name} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../vendor/physfs/src)
+
     string(REGEX MATCH ".*/.*/" resources_dir ${example_source})
     string(APPEND resources_dir "resources")
 endforeach()
