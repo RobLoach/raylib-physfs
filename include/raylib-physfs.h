@@ -67,8 +67,9 @@ RAYLIB_PHYSFS_DEF Texture2D LoadTextureFromPhysFS(const char* fileName);        
 RAYLIB_PHYSFS_DEF Wave LoadWaveFromPhysFS(const char* fileName);                  // Load wave data from PhysFS
 RAYLIB_PHYSFS_DEF Music LoadMusicStreamFromPhysFS(const char* fileName);          // Load music data from PhysFS
 RAYLIB_PHYSFS_DEF Font LoadFontFromPhysFS(const char* fileName, int fontSize, int *fontChars, int charsCount);  // Load a font from PhysFS
-RAYLIB_PHYSFS_DEF Shader LoadShaderFromPhysFS(const char *vsFileName, const char *fsFileName);  // Load shader from PhysFS
+RAYLIB_PHYSFS_DEF Shader LoadShaderFromPhysFS(const char* vsFileName, const char* fsFileName);  // Load shader from PhysFS
 RAYLIB_PHYSFS_DEF void SetPhysFSCallbacks();                                      // Set the raylib file loader/saver callbacks to use PhysFS
+RAYLIB_PHYSFS_DEF const char* GetPerfDirectory(const char *organization, const char *application); // Get the user's current config directory for the application.
 
 #ifdef __cplusplus
 }
@@ -614,6 +615,25 @@ void SetPhysFSCallbacks() {
     SetSaveFileDataCallback(SaveFileDataToPhysFS);
     SetLoadFileTextCallback(LoadFileTextFromPhysFS);
     SetSaveFileTextCallback(SaveFileTextToPhysFS);
+}
+
+/**
+ * Get the user's configuration directory for the application.
+ *
+ * @param organization The name of your organization.
+ * @param application The name of your application.
+ *
+ * @return string of user directory in platform-dependent notation.
+ *         NULL if there's a problem (creating directory failed, etc)
+ */
+const char* GetPerfDirectory(const char *organization, const char *application) {
+    const char* output = PHYSFS_getPrefDir(organization, application);
+    if (output == 0) {
+        TracePhysFSError("Failed to get perf directory");
+        return 0;
+    }
+    TraceLog(LOG_DEBUG, "PHYSFS: Perf Directory: %s", output);
+    return output;
 }
 
 #ifdef __cplusplus

@@ -131,11 +131,15 @@ int main(int argc, char *argv[]) {
     // SetPhysFSCallbacks()
     SetPhysFSCallbacks();
 
+    // GetPerfDirectory
+    const char* perfDir = GetPerfDirectory("RobLoach", "raylib-physfs-test");
+    assert(perfDir != 0);
+
     // ClosePhysFS()
     assert(ClosePhysFS());
 
     TraceLog(LOG_INFO, "================================");
-    TraceLog(LOG_INFO, "raylib-physfs tests succesful");
+    TraceLog(LOG_INFO, "raylib-physfs-test succesful");
     TraceLog(LOG_INFO, "================================");
 
     return 0;
