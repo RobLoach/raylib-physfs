@@ -29,6 +29,7 @@ if (NOT physfs_FOUND)
     set(PHYSFS_ARCHIVE_VDF OFF CACHE BOOL "" FORCE)
     set(PHYSFS_BUILD_TEST OFF CACHE BOOL "" FORCE)
     add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../vendor/physfs ${CMAKE_CURRENT_SOURCE_DIR}/../vendor/physfs)
+    target_include_directories(physfs-static PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../vendor/physfs/src)
 endif()
 
 # Find all examples
