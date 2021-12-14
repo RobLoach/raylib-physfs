@@ -1,6 +1,6 @@
 # raylib-physfs
 
-Integrate the virtual file system [PhysicsFS](https://icculus.org/physfs/) with [raylib](https://www.raylib.com/), allowing to load images, audio, and fonts from data archives. In order to reduce the dependency tree, this uses [miniphysfs](https://github.com/edubart/miniphysfs).
+Integrate the virtual file system [PhysicsFS](https://icculus.org/physfs/) with [raylib](https://www.raylib.com/), allowing to load images, audio, and fonts from data archives. This uses [miniphysfs](https://github.com/edubart/miniphysfs) to reduce the dependency tree.
 
 ## Features
 

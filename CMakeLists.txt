@@ -3,7 +3,8 @@ project (raylib-physfs
     VERSION 4.0.1
     DESCRIPTION "raylib-physfs"
     HOMEPAGE_URL "https://github.com/robloach/raylib-physfs"
-    LANGUAGES C)
+    LANGUAGES C
+)
 
 # Include Directory
 add_subdirectory(include)
