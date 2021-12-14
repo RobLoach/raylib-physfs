@@ -1,7 +1,7 @@
 #include <assert.h>
 #include "raylib.h"
 
-// Tests use the raylib-physfs-static library, so don't need to define implementation.
+// Tests use the raylib-physfs-static library, so don't need to define RAYLIB_PHYSFS_IMPLEMENTATION.
 // #define RAYLIB_PHYSFS_IMPLEMENTATION
 #include "raylib-physfs.h"
 

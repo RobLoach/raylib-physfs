@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.11)
 project (raylib-physfs
-    VERSION 4.0.0
+    VERSION 4.0.1
     DESCRIPTION "raylib-physfs"
     HOMEPAGE_URL "https://github.com/robloach/raylib-physfs"
     LANGUAGES C)
@@ -9,7 +9,7 @@ project (raylib-physfs
 add_subdirectory(include)
 
 # Static Library
-option(BUILD_RAYLIB_PHYSFS_LIB "Static Library" ON)
+option(BUILD_RAYLIB_PHYSFS_LIB "Library" ON)
 if(BUILD_RAYLIB_PHYSFS_LIB)
     add_subdirectory(lib)
 endif()

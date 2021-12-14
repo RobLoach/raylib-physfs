@@ -22,4 +22,4 @@ jobs:
       run: cmake --build build
 
     - name: Test
-      run: ./build/tests/raylib-physfs-test
+      run: ./build/test/raylib-physfs-test
