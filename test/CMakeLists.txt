@@ -2,8 +2,7 @@
 add_executable(raylib-physfs-test raylib-physfs-test.c)
 target_link_libraries(raylib-physfs-test PUBLIC
     raylib
-    physfs-static
-    raylib-physfs
+    raylib-physfs-static
 )
 
 # Copy the resources

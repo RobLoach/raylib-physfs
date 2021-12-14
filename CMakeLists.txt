@@ -8,6 +8,12 @@ project (raylib-physfs
 # Include Directory
 add_subdirectory(include)
 
+# Static Library
+option(BUILD_RAYLIB_PHYSFS_LIB "Static Library" ON)
+if(BUILD_RAYLIB_PHYSFS_LIB)
+    add_subdirectory(lib)
+endif()
+
 # Examples
 option(BUILD_RAYLIB_PHYSFS_EXAMPLES "Examples" ON)
 if(BUILD_RAYLIB_PHYSFS_EXAMPLES)
@@ -15,11 +21,10 @@ if(BUILD_RAYLIB_PHYSFS_EXAMPLES)
 endif()
 
 # Testing
-include(CTest)
-enable_testing()
-if(BUILD_TESTING AND BUILD_RAYLIB_PHYSFS_EXAMPLES)
-    set(CTEST_CUSTOM_TESTS_IGNORE
-        pkg-config--static
-    )
-    add_subdirectory(test)
+if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+    include(CTest)
+    enable_testing()
+    if(BUILD_TESTING AND BUILD_RAYLIB_PHYSFS_LIB)
+        add_subdirectory(test)
+    endif()
 endif()

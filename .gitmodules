@@ -6,3 +6,7 @@
 	path = vendor/physfs
 	url = https://github.com/icculus/physfs.git
 	ignore = dirty
+[submodule "vendor/miniphysfs"]
+	path = vendor/miniphysfs
+	url = https://github.com/edubart/miniphysfs.git
+	ignore = dirty
