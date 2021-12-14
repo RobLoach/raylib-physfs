@@ -1,6 +1,6 @@
 # raylib-physfs
 
-Integrate the virtual file system [PhysicsFS](https://icculus.org/physfs/) with [raylib](https://www.raylib.com/), allowing to load images, audio, and fonts from data archives.
+Integrate the virtual file system [PhysicsFS](https://icculus.org/physfs/) with [raylib](https://www.raylib.com/), allowing to load images, audio, and fonts from data archives. This uses [miniphysfs](https://github.com/edubart/miniphysfs) to reduce the dependency tree.
 
 ## Features
 
@@ -19,7 +19,7 @@ Integrate the virtual file system [PhysicsFS](https://icculus.org/physfs/) with 
 
 ## Usage
 
-This is a single-file header. To use it, define `RAYLIB_PHYSFS_IMPLEMENTATION` in one `.c` source file before including [`raylib-physfs.h`](include/raylib-physfs.h). You will also have to link the PhysFS and raylib dependencies.
+This is a header library. To use it, define `RAYLIB_PHYSFS_IMPLEMENTATION` in one `.c` source file before including [`raylib-physfs.h`](include/raylib-physfs.h). You will also have to link the raylib dependencies.
 
 ### Example
 
@@ -31,7 +31,7 @@ int main() {
     // Initiatize the file system.
     InitPhysFS();
 
-    // Mount a directory or archive.
+    // Mount a directory or archive into a given namespace.
     MountPhysFS("assets.zip", "assets");
 
     // Load an image through PhysFS.
@@ -76,12 +76,15 @@ Add these defines to help shape the behaviour of raylib-physfs...
 
 - `RAYLIB_PHYSFS_IMPLEMENTATION` Define this in one of your `.c`/`.cpp` files prior to including *raylib-physfs.h*
 - `RAYLIB_PHYSFS_STATIC` Use [`static`](https://en.wikipedia.org/wiki/Static_(keyword)) function definitions
+- `PHYSFS_SUPPORTS_ONLY_ZIP` Only support .zip archives, rather than all the available ones.
 
 ## Development
 
 To build the examples locally, and run tests, use [cmake](https://cmake.org/).
 
 ``` bash
+git clone https://github.com/RobLoach/raylib-physfs.git
+cd raylib-physfs
 git submodule update --init
 mkdir build
 cd build
@@ -94,4 +97,4 @@ cd examples
 
 ## License
 
-raylib-physfs is licensed under an unmodified zlib/libpng license, which is an OSI-certified, BSD-like license that allows static linking with closed source software. Check [LICENSE](LICENSE) for further details.
+*raylib-physfs* is licensed under an unmodified zlib/libpng license, which is an OSI-certified, BSD-like license that allows static linking with closed source software. Check [LICENSE](LICENSE) for further details.

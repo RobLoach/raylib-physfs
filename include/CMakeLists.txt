@@ -10,7 +10,6 @@ if (RAYLIB_PHYSFS_STATIC)
 endif()
 
 # Set the header files as install files.
-install(FILES
-    raylib-physfs.h
+install(FILES raylib-physfs.h miniphysfs.h
     DESTINATION include
 )

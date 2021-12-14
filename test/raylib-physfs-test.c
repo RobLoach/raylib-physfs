@@ -1,7 +1,8 @@
 #include <assert.h>
 #include "raylib.h"
 
-#define RAYLIB_PHYSFS_IMPLEMENTATION
+// Tests use the raylib-physfs-static library, so don't need to define RAYLIB_PHYSFS_IMPLEMENTATION.
+// #define RAYLIB_PHYSFS_IMPLEMENTATION
 #include "raylib-physfs.h"
 
 int main(int argc, char *argv[]) {
@@ -12,8 +13,10 @@ int main(int argc, char *argv[]) {
     TraceLog(LOG_INFO, "================================");
 
     // Make sure we're running in the correct directory.
-    const char* dir = GetDirectoryPath(argv[0]);
-    assert(ChangeDirectory(dir) == true);
+    if (argc > 0) {
+        const char* dir = GetDirectoryPath(argv[0]);
+        assert(ChangeDirectory(dir) == true);
+    }
 
     // IsPhysFSReady()
     assert(!IsPhysFSReady());
