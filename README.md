@@ -2,26 +2,20 @@
 
 [![Tests](https://github.com/RobLoach/raylib-physfs/actions/workflows/Tests.yml/badge.svg)](https://github.com/RobLoach/raylib-physfs/actions/workflows/Tests.yml)
 
-Integrate the virtual file system [PhysicsFS](https://icculus.org/physfs/) with [raylib](https://www.raylib.com/), allowing to load images, audio, and fonts from data archives. In order to ease the dependency tree, this uses [miniphysfs](https://github.com/edubart/miniphysfs) so that there's no need to link PhySFS.
+Load [raylib](https://www.raylib.com/) images, sounds, music, fonts and shaders from data archives, like `.zip` files, through [PhysicsFS](https://icculus.org/physfs/). This comes bundled with [miniphysfs](https://github.com/edubart/miniphysfs), so that there's no need to link PhysFS.
 
 ## Features
 
-- Load the following data from archives
-    - Images with `LoadImageFromPhysFS()`
-    - Textures with `LoadTextureFromPhysFS()`
-    - Music with `LoadMusicStreamFromPhysFS()`
-    - Waves with `LoadWaveFromPhysFS()`
-    - Fonts with `LoadFontFromPhysFS()`
-    - Text with `LoadFileTextFromPhysFS()`
-    - Shaders with `LoadShaderFromPhysFS()`
-- Check if directories and files exist
-- Enumerate across multiple archives and mount paths
+- Load various assets from data archives, including Images, Textures, Music, Waves, Fonts, Text, Data and Shaders
+- Check if directories and files exist within archives
+- Enumerate across multiple archives and mounted paths
 - Save files through PhysFS
-- Set all file loading to use PhysFS with `SetPhysFSCallbacks()`
+- Set all file loading to use PhysFS via `SetPhysFSCallbacks()`
+- Find the user's configuration directory with `GetPerfDirectory()`
 
 ## Usage
 
-This is a header library. To use it, define `RAYLIB_PHYSFS_IMPLEMENTATION` in one `.c` source file before including [`raylib-physfs.h`](include/raylib-physfs.h). You will also have to link the raylib dependencies.
+This is a header-only library. To use it, define `RAYLIB_PHYSFS_IMPLEMENTATION` in one `.c` source file before including [`raylib-physfs.h`](include/raylib-physfs.h). You will also have to link the raylib dependencies.
 
 ### Example
 
