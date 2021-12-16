@@ -64,6 +64,7 @@ Music LoadMusicStreamFromPhysFS(const char* fileName);          // Load music da
 Font LoadFontFromPhysFS(const char* fileName, int fontSize, int *fontChars, int charsCount);  // Load a font from PhysFS
 Shader LoadShaderFromPhysFS(const char *vsFileName, const char *fsFileName);  // Load shader from PhysFS
 void SetPhysFSCallbacks();                                      // Set the raylib file loader/saver callbacks to use PhysFS
+const char* GetPerfDirectory(const char *org, const char *app); // Get the user's current config directory for the application.
 ```
 
 ### Defines
