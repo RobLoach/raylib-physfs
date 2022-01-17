@@ -26,10 +26,10 @@ int main(void)
     InitAudioDevice();      // Initialize audio device
 
     InitPhysFS();           // Initialize PhysFS
-    MountPhysFS("resources", ""); // Mount the resources directory.
+    MountPhysFS("resources", "res"); // Mount the resources directory.
 
-    Wave wav = LoadWaveFromPhysFS("sound.wav");
-    Wave ogg = LoadWaveFromPhysFS("target.ogg");
+    Wave wav = LoadWaveFromPhysFS("res/sound.wav");
+    Wave ogg = LoadWaveFromPhysFS("res/target.ogg");
 
     Sound fxWav = LoadSoundFromWave(wav);         // Load WAV audio file
     Sound fxOgg = LoadSoundFromWave(ogg);        // Load OGG audio file

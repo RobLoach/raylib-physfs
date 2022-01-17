@@ -82,7 +82,6 @@ To build the examples locally, and run tests, use [cmake](https://cmake.org/).
 ``` bash
 git clone https://github.com/RobLoach/raylib-physfs.git
 cd raylib-physfs
-git submodule update --init
 mkdir build
 cd build
 cmake ..
