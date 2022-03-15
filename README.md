@@ -21,6 +21,7 @@ This is a header-only library. To use it, define `RAYLIB_PHYSFS_IMPLEMENTATION` 
 
 ``` c
 #define RAYLIB_PHYSFS_IMPLEMENTATION
+#define PHYSFS_SUPPORTS_ONLY_ZIP
 #include "raylib-physfs.h"
 
 int main() {
@@ -30,7 +31,7 @@ int main() {
     // Mount a directory or archive into a given namespace.
     MountPhysFS("assets.zip", "assets");
 
-    // Load an image through PhysFS.
+    // Load an image through PhysFS directly from assets.zip.
     Image dog = LoadImageFromPhysFS("assets/dog.png");
 
     // Close the file system.
