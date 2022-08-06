@@ -15,13 +15,12 @@ Load [raylib](https://www.raylib.com/) images, sounds, music, fonts and shaders 
 
 ## Usage
 
-This is a header-only library. To use it, define `RAYLIB_PHYSFS_IMPLEMENTATION` in one `.c` source file before including [`raylib-physfs.h`](include/raylib-physfs.h). You will also have to link the raylib dependencies.
+This is a header-only library. To use it, define `RAYLIB_PHYSFS_IMPLEMENTATION` in one `.c` source file before including [`raylib-physfs.h`](include/raylib-physfs.h). You will also have to link the raylib & physfs dependencies.
 
 ### Example
 
 ``` c
 #define RAYLIB_PHYSFS_IMPLEMENTATION
-#define PHYSFS_SUPPORTS_ONLY_ZIP
 #include "raylib-physfs.h"
 
 int main() {
@@ -70,11 +69,8 @@ const char* GetPerfDirectory(const char *org, const char *app); // Get the user'
 
 ### Defines
 
-Add these defines to help shape the behaviour of raylib-physfs...
+Have a look at [Cmake config](CMakeLists.txt) to see how to define different things that change the behavior of physfs, raylib, and raylib-physfs.
 
-- `RAYLIB_PHYSFS_IMPLEMENTATION` Define this in one of your `.c`/`.cpp` files prior to including *raylib-physfs.h*
-- `RAYLIB_PHYSFS_STATIC` Use [`static`](https://en.wikipedia.org/wiki/Static_(keyword)) function definitions
-- `PHYSFS_SUPPORTS_ONLY_ZIP` Only support .zip archives, rather than all the available ones.
 
 ## Development
 

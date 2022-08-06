@@ -85,7 +85,7 @@ RAYLIB_PHYSFS_DEF const char* GetPerfDirectory(const char *organization, const c
 #define PHYSFS_IMPL
 #define PHYSFS_PLATFORM_IMPL
 #define PHYSFS_DECL RAYLIB_PHYSFS_DEF
-#include "miniphysfs.h" // NOLINT
+#include "physfs.h"
 
 #ifdef __cplusplus
 extern "C" {
