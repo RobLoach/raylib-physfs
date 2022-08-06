@@ -2,7 +2,7 @@
 
 [![Tests](https://github.com/RobLoach/raylib-physfs/actions/workflows/Tests.yml/badge.svg)](https://github.com/RobLoach/raylib-physfs/actions/workflows/Tests.yml)
 
-Load [raylib](https://www.raylib.com/) images, sounds, music, fonts and shaders from data archives, like `.zip` files, through [PhysicsFS](https://icculus.org/physfs/). This comes bundled with [miniphysfs](https://github.com/edubart/miniphysfs), so that there's no need to link PhysFS.
+Load [raylib](https://www.raylib.com/) images, sounds, music, fonts and shaders from data archives, like `.zip` files, through [PhysicsFS](https://icculus.org/physfs/).
 
 ## Features
 
