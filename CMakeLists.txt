@@ -38,40 +38,58 @@ FetchContent_Declare(physfs GIT_REPOSITORY https://github.com/icculus/physfs.git
 FetchContent_MakeAvailable(physfs)
 include_directories(${physfs_SOURCE_DIR}/src)
 
-# demos
+# Options
+if ("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
+    set(RAYLIB_PHYSFS_IS_MAIN TRUE)
+else()
+    set(RAYLIB_PHYSFS_IS_MAIN FALSE)
+endif()
+option(RAYLIB_PHYSFS_BUILD_EXAMPLES "Examples" ${RAYLIB_PHYSFS_IS_MAIN})
 
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/examples/audio/resources/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/resources/)
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/examples/shaders/resources/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/resources/)
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/examples/text/resources/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/resources/)
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/examples/textures/resources/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/resources/)
+add_library(raylib_physfs INTERFACE)
 
-add_executable(audio_music_stream)
-target_sources(audio_music_stream PRIVATE "${CMAKE_CURRENT_LIST_DIR}/examples/audio/audio_music_stream.c")
-target_include_directories(audio_music_stream PRIVATE ".")
-target_link_libraries(audio_music_stream PRIVATE raylib physfs-static)
+# Include Directory
+target_include_directories(raylib_physfs INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/)
 
-add_executable(audio_sound_loading)
-target_sources(audio_sound_loading PRIVATE "${CMAKE_CURRENT_LIST_DIR}/examples/audio/audio_sound_loading.c")
-target_include_directories(audio_sound_loading PRIVATE ".")
-target_link_libraries(audio_sound_loading PRIVATE raylib physfs-static)
+# Set the header files as install files.
+install(FILES raylib-physfs.h
+    DESTINATION include
+)
 
-add_executable(shaders_texture_waves)
-target_sources(shaders_texture_waves PRIVATE "${CMAKE_CURRENT_LIST_DIR}/examples/shaders/shaders_texture_waves.c")
-target_include_directories(shaders_texture_waves PRIVATE ".")
-target_link_libraries(shaders_texture_waves PRIVATE raylib physfs-static)
+# examples
+if (RAYLIB_PHYSFS_BUILD_EXAMPLES)
+    file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/examples/audio/resources/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/resources/)
+    file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/examples/shaders/resources/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/resources/)
+    file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/examples/text/resources/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/resources/)
+    file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/examples/textures/resources/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/resources/)
 
-add_executable(text_basic_loading)
-target_sources(text_basic_loading PRIVATE "${CMAKE_CURRENT_LIST_DIR}/examples/text/text_basic_loading.c")
-target_include_directories(text_basic_loading PRIVATE ".")
-target_link_libraries(text_basic_loading PRIVATE raylib physfs-static)
+    add_executable(audio_music_stream)
+    target_sources(audio_music_stream PRIVATE "${CMAKE_CURRENT_LIST_DIR}/examples/audio/audio_music_stream.c")
+    target_include_directories(audio_music_stream PRIVATE ".")
+    target_link_libraries(audio_music_stream PRIVATE raylib physfs-static)
 
-add_executable(text_font_loading)
-target_sources(text_font_loading PRIVATE "${CMAKE_CURRENT_LIST_DIR}/examples/text/text_font_loading.c")
-target_include_directories(text_font_loading PRIVATE ".")
-target_link_libraries(text_font_loading PRIVATE raylib physfs-static)
+    add_executable(audio_sound_loading)
+    target_sources(audio_sound_loading PRIVATE "${CMAKE_CURRENT_LIST_DIR}/examples/audio/audio_sound_loading.c")
+    target_include_directories(audio_sound_loading PRIVATE ".")
+    target_link_libraries(audio_sound_loading PRIVATE raylib physfs-static)
 
-add_executable(textures_image_loading)
-target_sources(textures_image_loading PRIVATE "${CMAKE_CURRENT_LIST_DIR}/examples/textures/textures_image_loading.c")
-target_include_directories(textures_image_loading PRIVATE ".")
-target_link_libraries(textures_image_loading PRIVATE raylib physfs-static)
+    add_executable(shaders_texture_waves)
+    target_sources(shaders_texture_waves PRIVATE "${CMAKE_CURRENT_LIST_DIR}/examples/shaders/shaders_texture_waves.c")
+    target_include_directories(shaders_texture_waves PRIVATE ".")
+    target_link_libraries(shaders_texture_waves PRIVATE raylib physfs-static)
 
+    add_executable(text_basic_loading)
+    target_sources(text_basic_loading PRIVATE "${CMAKE_CURRENT_LIST_DIR}/examples/text/text_basic_loading.c")
+    target_include_directories(text_basic_loading PRIVATE ".")
+    target_link_libraries(text_basic_loading PRIVATE raylib physfs-static)
+
+    add_executable(text_font_loading)
+    target_sources(text_font_loading PRIVATE "${CMAKE_CURRENT_LIST_DIR}/examples/text/text_font_loading.c")
+    target_include_directories(text_font_loading PRIVATE ".")
+    target_link_libraries(text_font_loading PRIVATE raylib physfs-static)
+
+    add_executable(textures_image_loading)
+    target_sources(textures_image_loading PRIVATE "${CMAKE_CURRENT_LIST_DIR}/examples/textures/textures_image_loading.c")
+    target_include_directories(textures_image_loading PRIVATE ".")
+    target_link_libraries(textures_image_loading PRIVATE raylib physfs-static)
+endif()
