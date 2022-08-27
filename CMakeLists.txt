@@ -1,13 +1,10 @@
 cmake_minimum_required(VERSION 3.11)
 project (raylib-physfs
-    VERSION 4.0.2
+    VERSION 4.2.0
     DESCRIPTION "raylib-physfs"
     HOMEPAGE_URL "https://github.com/robloach/raylib-physfs"
     LANGUAGES C
 )
-
-# Include Directory
-add_subdirectory(include)
 
 # Options
 if ("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
@@ -17,16 +14,28 @@ else()
 endif()
 option(RAYLIB_PHYSFS_BUILD_EXAMPLES "Examples" ${RAYLIB_PHYSFS_IS_MAIN})
 
-# Examples
+# Library
+add_library(raylib_physfs INTERFACE)
+
+# Include Directory
+target_include_directories(raylib_physfs INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/)
+
+# Set the header files as install files.
+install(FILES raylib-physfs.h
+    DESTINATION include
+)
+
+# examples
 if (RAYLIB_PHYSFS_BUILD_EXAMPLES)
     add_subdirectory(examples)
 
     # Testing
-    if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
-        include(CTest)
-        enable_testing()
-        if (BUILD_TESTING)
-            add_subdirectory(test)
-        endif()
+    include(CTest)
+    enable_testing()
+    if(BUILD_TESTING)
+        # set(CTEST_CUSTOM_TESTS_IGNORE
+        #     pkg-config--static
+        # )
+        add_subdirectory(test)
     endif()
 endif()

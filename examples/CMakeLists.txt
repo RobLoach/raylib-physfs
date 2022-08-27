@@ -1,16 +1,11 @@
-# Get the sources together
-set(example_dirs audio shaders text textures)
-set(example_sources)
-set(example_resources)
-
 # raylib
 find_package(raylib QUIET)
 if (NOT raylib_FOUND)
     include(FetchContent)
-        FetchContent_Declare(
+    FetchContent_Declare(
         raylib
         GIT_REPOSITORY https://github.com/raysan5/raylib.git
-        GIT_TAG 4.0.0
+        GIT_TAG 4.2.0
     )
     FetchContent_GetProperties(raylib)
     if (NOT raylib_POPULATED) # Have we downloaded raylib yet?
@@ -22,44 +17,64 @@ if (NOT raylib_FOUND)
     endif()
 endif()
 
-# Find all examples
-foreach(example_dir ${example_dirs})
-    file(GLOB sources ${example_dir}/*.c)
-    list(APPEND example_sources ${sources})
+# physfs
+find_package(physfs QUIET)
+if (NOT physfs_FOUND)
+    # You can change these to support other formats
+    set(PHYSFS_ARCHIVE_ZIP ON CACHE BOOL "" FORCE)
+    set(PHYSFS_ARCHIVE_7Z OFF CACHE BOOL "" FORCE)
+    set(PHYSFS_ARCHIVE_GRP OFF CACHE BOOL "" FORCE)
+    set(PHYSFS_ARCHIVE_WAD OFF CACHE BOOL "" FORCE)
+    set(PHYSFS_ARCHIVE_HOG OFF CACHE BOOL "" FORCE)
+    set(PHYSFS_ARCHIVE_MVL OFF CACHE BOOL "" FORCE)
+    set(PHYSFS_ARCHIVE_QPAK OFF CACHE BOOL "" FORCE)
+    set(PHYSFS_ARCHIVE_SLB OFF CACHE BOOL "" FORCE)
+    set(PHYSFS_ARCHIVE_ISO9660 OFF CACHE BOOL "" FORCE)
+    set(PHYSFS_ARCHIVE_VDF OFF CACHE BOOL "" FORCE)
 
-    # Any any resources
-    file(GLOB resources ${example_dir}/resources/*)
-    list(APPEND example_resources ${resources})
-endforeach()
+    # library options
+    set(PHYSFS_BUILD_STATIC ON CACHE BOOL "" FORCE)
+    set(PHYSFS_BUILD_SHARED OFF CACHE BOOL "" FORCE)
+    set(PHYSFS_BUILD_TEST OFF CACHE BOOL "" FORCE)
+    set(PHYSFS_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+    set(PHYSFS_DISABLE_INSTALL OFF CACHE BOOL "" FORCE)
 
-# Compile all examples
-foreach(example_source ${example_sources})
-    # Create the basename for the example
-    get_filename_component(example_name ${example_source} NAME)
-    string(REPLACE ".c" "${OUTPUT_EXT}" example_name ${example_name})
-
-    # Setup the example
-    add_executable(${example_name} ${example_source})
-
-    # Link raylib and raylib-cpp
-    target_link_libraries(${example_name} PUBLIC raylib raylib_physfs)
-
-    target_compile_definitions(${example_name} PUBLIC
-        PHYSFS_SUPPORTS_NO_ZIP
-        PHYSFS_SUPPORTS_NO_7Z
-        PHYSFS_SUPPORTS_NO_GRP
-        PHYSFS_SUPPORTS_NO_WAD
-        PHYSFS_SUPPORTS_NO_HOG
-        PHYSFS_SUPPORTS_NO_MVL
-        PHYSFS_SUPPORTS_NO_QPAK
-        PHYSFS_SUPPORTS_NO_SLB
-        PHYSFS_SUPPORTS_NO_ISO9660
-        PHYSFS_SUPPORTS_NO_VDF
+    include(FetchContent)
+    FetchContent_Declare(
+        physfs
+        GIT_REPOSITORY https://github.com/icculus/physfs.git
+        GIT_TAG main
     )
+    FetchContent_MakeAvailable(physfs)
+    include_directories(${physfs_SOURCE_DIR}/src)
+endif()
 
-    string(REGEX MATCH ".*/.*/" resources_dir ${example_source})
-    string(APPEND resources_dir "resources")
-endforeach()
+# Resources
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/audio/resources/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/resources/)
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/shaders/resources/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/resources/)
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/text/resources/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/resources/)
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/textures/resources/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/resources/)
 
-# Copy all the resources
-file(COPY ${example_resources} DESTINATION "resources/")
+add_executable(audio_music_stream)
+target_sources(audio_music_stream PRIVATE "${CMAKE_CURRENT_LIST_DIR}/audio/audio_music_stream.c")
+target_link_libraries(audio_music_stream PRIVATE raylib physfs-static raylib_physfs)
+
+add_executable(audio_sound_loading)
+target_sources(audio_sound_loading PRIVATE "${CMAKE_CURRENT_LIST_DIR}/audio/audio_sound_loading.c")
+target_link_libraries(audio_sound_loading PRIVATE raylib physfs-static raylib_physfs)
+
+add_executable(shaders_texture_waves)
+target_sources(shaders_texture_waves PRIVATE "${CMAKE_CURRENT_LIST_DIR}/shaders/shaders_texture_waves.c")
+target_link_libraries(shaders_texture_waves PRIVATE raylib physfs-static raylib_physfs)
+
+add_executable(text_basic_loading)
+target_sources(text_basic_loading PRIVATE "${CMAKE_CURRENT_LIST_DIR}/text/text_basic_loading.c")
+target_link_libraries(text_basic_loading PRIVATE raylib physfs-static raylib_physfs)
+
+add_executable(text_font_loading)
+target_sources(text_font_loading PRIVATE "${CMAKE_CURRENT_LIST_DIR}/text/text_font_loading.c")
+target_link_libraries(text_font_loading PRIVATE raylib physfs-static raylib_physfs)
+
+add_executable(textures_image_loading)
+target_sources(textures_image_loading PRIVATE "${CMAKE_CURRENT_LIST_DIR}/textures/textures_image_loading.c")
+target_link_libraries(textures_image_loading PRIVATE raylib physfs-static raylib_physfs)
