@@ -6,6 +6,7 @@
 *
 *   DEPENDENCIES:
 *       raylib 4 https://www.raylib.com/
+*       physfs https://github.com/icculus/physfs
 *
 *   LICENSE: zlib/libpng
 *
@@ -47,6 +48,7 @@ extern "C" {
 #endif
 
 RAYLIB_PHYSFS_DEF bool InitPhysFS();                                              // Initialize the PhysFS file system
+RAYLIB_PHYSFS_DEF bool InitPhysFSEx(const char* newDir, const char* mountPoint);  // Initialize the PhysFS file system with a mount point.
 RAYLIB_PHYSFS_DEF bool ClosePhysFS();                                             // Close the PhysFS file system
 RAYLIB_PHYSFS_DEF bool IsPhysFSReady();                                           // Check if PhysFS has been initialized successfully
 RAYLIB_PHYSFS_DEF bool MountPhysFS(const char* newDir, const char* mountPoint);   // Mount the given directory or archive as a mount point
@@ -186,6 +188,20 @@ bool InitPhysFS() {
     SetPhysFSWriteDirectory(GetWorkingDirectory());
     TraceLog(LOG_DEBUG, "PHYSFS: Initialized PhysFS");
     return true;
+}
+
+/**
+ * Initialize the PhysFS virtual file system with the given mount point.
+ *
+ * @return True on success, false on failure.
+ *
+ * @see ClosePhysFS()
+ */
+bool InitPhysFSEx(const char* newDir, const char* mountPoint) {
+    if (InitPhysFS()) {
+        return MountPhysFS(newDir, mountPoint);
+    }
+    return false;
 }
 
 /**

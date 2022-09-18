@@ -25,8 +25,8 @@ int main(void)
 
     InitAudioDevice();      // Initialize audio device
 
-    InitPhysFS();           // Initialize PhysFS
-    MountPhysFS("resources", "res"); // Mount the resources directory.
+    // Init PhysFS with the given mount point.
+    InitPhysFSEx("resources", "res");
 
     Wave wav = LoadWaveFromPhysFS("res/sound.wav");
     Wave ogg = LoadWaveFromPhysFS("res/target.ogg");

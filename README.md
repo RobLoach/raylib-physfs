@@ -47,6 +47,7 @@ int main() {
 
 ``` c
 bool InitPhysFS();                                              // Initialize the PhysFS file system
+bool InitPhysFSEx(const char* newDir, const char* mountPoint);  // Initialize the PhysFS file system with the given mount point.
 bool ClosePhysFS();                                             // Close the PhysFS file system
 bool IsPhysFSReady();                                           // Check if PhysFS has been initialized successfully
 bool MountPhysFS(const char* newDir, const char* mountPoint);   // Mount the given directory or archive as a mount point

@@ -26,8 +26,7 @@ int main(void)
     InitWindow(screenWidth, screenHeight, "raylib [text] example - basic loading");
 
     // Initialize the file system, and mount a directory.
-    InitPhysFS();
-    MountPhysFS("resources", "res");
+    InitPhysFSEx("resources", "res");
 
     // Load the image from PhysFS.
     char* text = LoadFileTextFromPhysFS("res/helloworld.txt");
