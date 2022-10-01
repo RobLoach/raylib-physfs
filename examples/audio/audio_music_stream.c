@@ -23,11 +23,11 @@ int main(void)
 
     InitWindow(screenWidth, screenHeight, "raylib [audio] example - music playing (streaming)");
 
+    InitAudioDevice();
+
     // Initialize the file system, and mount a directory.
     InitPhysFS();
     MountPhysFS("resources", "res");
-
-    InitAudioDevice();              // Initialize audio device
 
     Music music = LoadMusicStreamFromPhysFS("res/country.mp3");
 

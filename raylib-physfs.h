@@ -425,7 +425,12 @@ Music LoadMusicStreamFromPhysFS(const char* fileName) {
     // Load from the memory.
     const char* extension = GetFileExtension(fileName);
     Music music = LoadMusicStreamFromMemory(extension, fileData, bytesRead);
-    UnloadFileData(fileData);
+
+    // Unload the file data if the music failed to load.
+    if (music.ctxData == (void*)0) {
+        UnloadFileData(fileData);
+    }
+
     return music;
 }
 
