@@ -60,8 +60,7 @@ char* LoadFileTextFromPhysFS(const char* fileName);             // Load text fro
 bool SetPhysFSWriteDirectory(const char* newDir);               // Set the base directory where PhysFS should write files to (defaults to the current working directory)
 bool SaveFileDataToPhysFS(const char* fileName, void* data, unsigned int bytesToWrite);  // Save the given file data in PhysFS
 bool SaveFileTextToPhysFS(const char* fileName, char* text);    // Save the given file text in PhysFS
-char** GetDirectoryFilesFromPhysFS(const char* dirPath, int* count);  // Get filenames in a directory path (memory should be freed)
-void ClearDirectoryFilesFromPhysFS(char** filesList);           // Clear directory files paths buffers (free memory)
+FilePathList LoadDirectoryFilesFromPhysFS(const char* dirPath);  // Get filenames in a directory path (memory should be freed)
 long GetFileModTimeFromPhysFS(const char* fileName);            // Get file modification time (last write time) from PhysFS
 Image LoadImageFromPhysFS(const char* fileName);                // Load an image from PhysFS
 Texture2D LoadTextureFromPhysFS(const char* fileName);          // Load a texture from PhysFS

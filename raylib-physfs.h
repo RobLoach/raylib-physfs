@@ -5,7 +5,7 @@
 *   Copyright 2021 Rob Loach (@RobLoach)
 *
 *   DEPENDENCIES:
-*       raylib 4 https://www.raylib.com/
+*       raylib 4.2+ https://www.raylib.com/
 *       physfs https://github.com/icculus/physfs
 *
 *   LICENSE: zlib/libpng
@@ -33,8 +33,6 @@
 #ifndef INCLUDE_RAYLIB_PHYSFS_H_
 #define INCLUDE_RAYLIB_PHYSFS_H_
 
-#include "raylib.h" // NOLINT
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -61,8 +59,7 @@ RAYLIB_PHYSFS_DEF char* LoadFileTextFromPhysFS(const char* fileName);           
 RAYLIB_PHYSFS_DEF bool SetPhysFSWriteDirectory(const char* newDir);               // Set the base directory where PhysFS should write files to (defaults to the current working directory)
 RAYLIB_PHYSFS_DEF bool SaveFileDataToPhysFS(const char* fileName, void* data, unsigned int bytesToWrite);  // Save the given file data in PhysFS
 RAYLIB_PHYSFS_DEF bool SaveFileTextToPhysFS(const char* fileName, char* text);    // Save the given file text in PhysFS
-RAYLIB_PHYSFS_DEF char** GetDirectoryFilesFromPhysFS(const char* dirPath, int* count);  // Get filenames in a directory path (memory should be freed)
-RAYLIB_PHYSFS_DEF void ClearDirectoryFilesFromPhysFS(char** filesList);           // Clear directory files paths buffers (free memory)
+RAYLIB_PHYSFS_DEF FilePathList LoadDirectoryFilesFromPhysFS(const char* dirPath);  // Get filenames in a directory path (memory should be freed)
 RAYLIB_PHYSFS_DEF long GetFileModTimeFromPhysFS(const char* fileName);            // Get file modification time (last write time) from PhysFS
 RAYLIB_PHYSFS_DEF Image LoadImageFromPhysFS(const char* fileName);                // Load an image from PhysFS
 RAYLIB_PHYSFS_DEF Texture2D LoadTextureFromPhysFS(const char* fileName);          // Load a texture from PhysFS
@@ -554,40 +551,36 @@ bool SaveFileTextToPhysFS(const char* fileName, char* text) {
 /**
  * Gets a list of files in the given directory in PhysFS.
  *
- * Make sure to clear the loaded list by using ClearDirectoryFilesFromPhysFS().
+ * Make sure to clear the loaded list by using UnloadDirectoryFiles().
  *
- * @see ClearDirectoryFilesFromPhysFS()
+ * @see UnloadDirectoryFiles()
  */
-char** GetDirectoryFilesFromPhysFS(const char* dirPath, int *count) {
+FilePathList LoadDirectoryFilesFromPhysFS(const char* dirPath) {
     // Make sure the directory exists.
     if (!DirectoryExistsInPhysFS(dirPath)) {
         TraceLog(LOG_WARNING, "PHYSFS: Can't get files from non-existant directory (%s)", dirPath);
-        return 0;
+        FilePathList out;
+        out.capacity = 0;
+        out.count = 0;
+        out.paths = 0;
+        return out;
     }
+
+    // Prepare the output.
+    FilePathList output;
 
     // Load the list of files from PhysFS.
-    char** list = PHYSFS_enumerateFiles(dirPath);
+    output.paths = PHYSFS_enumerateFiles(dirPath);
 
     // Find out how many files there were.
-    int number = 0;
-    for (char** i = list; *i != 0; i++) {
-        number++;
+    output.count = 0;
+    for (char** i = output.paths; *i != 0; i++) {
+        output.count++;
     }
+    output.capacity = output.count;
 
     // Output the count and the list.
-    *count = number;
-    return list;
-}
-
-/**
- * Clears the loaded list of directory files from GetDirectoryFilesFromPhysFS().
- *
- * @param filesList The list of files to clear that was provided from GetDirectoryFilesFromPhysFS().
- *
- * @see GetDirectoryFilesFromPhysFS()
- */
-void ClearDirectoryFilesFromPhysFS(char** filesList) {
-    PHYSFS_freeList(filesList);
+    return output;
 }
 
 /**

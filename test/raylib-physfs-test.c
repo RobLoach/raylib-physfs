@@ -1,5 +1,5 @@
-#include <assert.h>
 #include "raylib.h"
+#include "raylib-assert.h"
 
 #define RAYLIB_PHYSFS_IMPLEMENTATION
 #include "raylib-physfs.h"
@@ -14,128 +14,134 @@ int main(int argc, char *argv[]) {
     // Make sure we're running in the correct directory.
     if (argc > 0) {
         const char* dir = GetDirectoryPath(argv[0]);
-        assert(ChangeDirectory(dir) == true);
+        Assert(ChangeDirectory(dir) == true);
     }
 
     // IsPhysFSReady()
-    assert(!IsPhysFSReady());
+    AssertNot(IsPhysFSReady());
 
     // InitPhysFS()
-    assert(InitPhysFS());
-    assert(IsPhysFSReady());
+    Assert(InitPhysFS());
+    Assert(IsPhysFSReady());
 
     // MountPhysFS()
-    assert(MountPhysFS("resources", "assets"));
+    Assert(MountPhysFS("resources", "assets"));
 
     // FileExistsInPhysFS()
-    assert(FileExistsInPhysFS("assets/text.txt"));
-    assert(!FileExistsInPhysFS("MissingFile.txt"));
+    Assert(FileExistsInPhysFS("assets/text.txt"));
+    AssertNot(FileExistsInPhysFS("MissingFile.txt"));
 
     // DirectoryExistsInPhysFS()
-    assert(DirectoryExistsInPhysFS("assets"));
-    assert(!DirectoryExistsInPhysFS("MissingDirectory"));
+    Assert(DirectoryExistsInPhysFS("assets"));
+    AssertNot(DirectoryExistsInPhysFS("MissingDirectory"));
 
     // LoadFileDataFromPhysFS()
     {
         unsigned int bytesRead = 0;
         unsigned char* fileData = LoadFileDataFromPhysFS("assets/text.txt", &bytesRead);
-        assert(fileData);
-        assert(bytesRead > 0);
+        Assert(fileData);
+        Assert(bytesRead > 0);
         UnloadFileData(fileData);
 
         unsigned char* missingFileData = LoadFileDataFromPhysFS("MissingFile.txt", &bytesRead);
-        assert(missingFileData == 0);
+        AssertEqual(missingFileData, 0);
     }
 
     // SaveFileDataToPhysFS()
     {
-        assert(SaveFileDataToPhysFS("resources/SaveFileDataToPhysFS.txt", "Hello", 5));
+        Assert(SaveFileDataToPhysFS("resources/SaveFileDataToPhysFS.txt", "Hello", 5));
         unsigned int bytesRead = 0;
         unsigned char* fileData = LoadFileData("resources/SaveFileDataToPhysFS.txt", &bytesRead);
-        assert(bytesRead == 5);
+        AssertEqual(bytesRead, 5);
     }
 
     // SaveFileTextToPhysFS()
     {
-        assert(SaveFileTextToPhysFS("resources/SaveFileTextToPhysFS.txt", "Hello World"));
+        Assert(SaveFileTextToPhysFS("resources/SaveFileTextToPhysFS.txt", "Hello World"));
         char* fileText = LoadFileText("resources/SaveFileTextToPhysFS.txt");
-        assert(TextIsEqual(fileText, "Hello World"));
+        Assert(TextIsEqual(fileText, "Hello World"));
         UnloadFileText(fileText);
     }
 
-    // GetDirectoryFilesFromPhysFS()
+    // LoadDirectoryFilesFromPhysFS()
     {
-        int count = 0;
-        char** files = GetDirectoryFilesFromPhysFS("assets", &count);
+        FilePathList files = LoadDirectoryFilesFromPhysFS("assets");
         bool textFileFound = false;
-        assert(count > 4);
-        for (int i = 0; i < count; i++) {
-            if (TextIsEqual(GetFileName(files[i]), "text.txt")) {
+        Assert(files.count > 4);
+        TraceLog(LOG_INFO, "LoadDirectoryFilesFromPhysFS: Files in assets: %i", files.count);
+        for (int i = 0; i < files.count; i++) {
+            if (TextIsEqual(GetFileName(files.paths[i]), "text.txt")) {
                 textFileFound = true;
             }
         }
-        ClearDirectoryFilesFromPhysFS(files);
-        assert(textFileFound);
+        UnloadDirectoryFiles(files);
+        Assert(textFileFound, "LoadDirectoryFilesFromPhysFS() could not find text.txt");
     }
 
     // LoadFileTextFromPhysFS()
     {
         char* fileText = LoadFileTextFromPhysFS("assets/text.txt");
-        assert(fileText != 0);
-        assert(TextIsEqual(fileText, "Hello, World!\n"));
+        AssertNotEqual(fileText, 0);
+        Assert(TextIsEqual(TextSubtext(fileText, 7, 5), "World")); // Hello, World!
         UnloadFileText(fileText);
 
         char* missingText = LoadFileTextFromPhysFS("MissingText.txt");
-        assert(missingText == 0);
+        AssertEqual(missingText, 0);
     }
 
     // LoadImageFromPhysFS()
     {
         Image image = LoadImageFromPhysFS("assets/image.png");
-        assert(image.width > 100);
+        AssertImage(image);
+        Assert(image.width > 100);
+
+        Image loadedImage = LoadImage("resources/image.png");
+        AssertImage(loadedImage);
+        AssertImageSame(image, loadedImage);
         UnloadImage(image);
+        UnloadImage(loadedImage);
 
         Image missingImage = LoadImageFromPhysFS("MissingFile.png");
-        assert(missingImage.data == 0);
+        AssertEqual(missingImage.data, 0);
     }
 
     // LoadWaveFromPhysFS()
     {
         Wave wave = LoadWaveFromPhysFS("assets/sound.wav");
-        assert(wave.data != 0);
+        AssertNotEqual(wave.data, 0);
         UnloadWave(wave);
 
         Wave missingWave = LoadWaveFromPhysFS("MissingFile.wav");
-        assert(missingWave.data == 0);
+        AssertEqual(missingWave.data, 0);
     }
 
     // LoadShaderFromPhysFS()
     {
         Shader missingShader = LoadShaderFromPhysFS("MissingFile.txt", "MissingFile.txt");
-        assert(missingShader.locs == 0);
+        AssertEqual(missingShader.locs, 0);
     }
 
     // GetFileModTimeFromPhysFS()
-    assert(GetFileModTimeFromPhysFS("assets/text.txt") > 1000);
-    assert(GetFileModTimeFromPhysFS("MissingFile.txt") == -1);
+    Assert(GetFileModTimeFromPhysFS("assets/text.txt") > 1000);
+    AssertEqual(GetFileModTimeFromPhysFS("MissingFile.txt"), -1);
 
     // SetPhysFSWriteDirectory()
-    assert(SetPhysFSWriteDirectory("resources"));
-    assert(!SetPhysFSWriteDirectory("MissingDirectory"));
+    Assert(SetPhysFSWriteDirectory("resources"));
+    AssertNot(SetPhysFSWriteDirectory("MissingDirectory"));
 
     // UnmountPhysFS()
-    assert(UnmountPhysFS("resources"));
-    assert(!UnmountPhysFS("MissingDirectory"));
+    Assert(UnmountPhysFS("resources"));
+    AssertNot(UnmountPhysFS("MissingDirectory"));
 
     // SetPhysFSCallbacks()
     SetPhysFSCallbacks();
 
     // GetPerfDirectory
     const char* perfDir = GetPerfDirectory("RobLoach", "raylib-physfs-test");
-    assert(perfDir != 0);
+    AssertNotEqual(perfDir, 0);
 
     // ClosePhysFS()
-    assert(ClosePhysFS());
+    Assert(ClosePhysFS());
 
     TraceLog(LOG_INFO, "================================");
     TraceLog(LOG_INFO, "raylib-physfs-test succesful");
