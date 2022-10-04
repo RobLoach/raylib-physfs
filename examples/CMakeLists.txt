@@ -1,53 +1,9 @@
-# raylib
-find_package(raylib QUIET)
-if (NOT raylib_FOUND)
-    include(FetchContent)
-    FetchContent_Declare(
-        raylib
-        GIT_REPOSITORY https://github.com/raysan5/raylib.git
-        GIT_TAG 4.2.0
-    )
-    FetchContent_GetProperties(raylib)
-    if (NOT raylib_POPULATED) # Have we downloaded raylib yet?
-        set(FETCHCONTENT_QUIET NO)
-        FetchContent_Populate(raylib)
-        set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-        set(BUILD_GAMES    OFF CACHE BOOL "" FORCE)
-        add_subdirectory(${raylib_SOURCE_DIR} ${raylib_BINARY_DIR})
-    endif()
-endif()
 
-# physfs
-find_package(physfs QUIET)
-if (NOT physfs_FOUND)
-    # You can change these to support other formats
-    set(PHYSFS_ARCHIVE_ZIP ON CACHE BOOL "" FORCE)
-    set(PHYSFS_ARCHIVE_7Z OFF CACHE BOOL "" FORCE)
-    set(PHYSFS_ARCHIVE_GRP OFF CACHE BOOL "" FORCE)
-    set(PHYSFS_ARCHIVE_WAD OFF CACHE BOOL "" FORCE)
-    set(PHYSFS_ARCHIVE_HOG OFF CACHE BOOL "" FORCE)
-    set(PHYSFS_ARCHIVE_MVL OFF CACHE BOOL "" FORCE)
-    set(PHYSFS_ARCHIVE_QPAK OFF CACHE BOOL "" FORCE)
-    set(PHYSFS_ARCHIVE_SLB OFF CACHE BOOL "" FORCE)
-    set(PHYSFS_ARCHIVE_ISO9660 OFF CACHE BOOL "" FORCE)
-    set(PHYSFS_ARCHIVE_VDF OFF CACHE BOOL "" FORCE)
+# Add the cmake module path
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/../cmake)
 
-    # library options
-    set(PHYSFS_BUILD_STATIC ON CACHE BOOL "" FORCE)
-    set(PHYSFS_BUILD_SHARED OFF CACHE BOOL "" FORCE)
-    set(PHYSFS_BUILD_TEST OFF CACHE BOOL "" FORCE)
-    set(PHYSFS_BUILD_DOCS OFF CACHE BOOL "" FORCE)
-    set(PHYSFS_DISABLE_INSTALL OFF CACHE BOOL "" FORCE)
-
-    include(FetchContent)
-    FetchContent_Declare(
-        physfs
-        GIT_REPOSITORY https://github.com/icculus/physfs.git
-        GIT_TAG release-3.2.0
-    )
-    FetchContent_MakeAvailable(physfs)
-    include_directories(${physfs_SOURCE_DIR}/src)
-endif()
+find_package(Raylib)
+find_package(PhysFS)
 
 # Resources
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/audio/resources/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/resources/)
