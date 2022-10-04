@@ -4,6 +4,8 @@
 
 Load [raylib](https://www.raylib.com/) images, sounds, music, fonts and shaders from data archives, like `.zip` files, through [PhysicsFS](https://github.com/icculus/physfs).
 
+[![Screenshot of textures_image_loading example](examples/textures/textures_image_loading.png)](examples/textures/textures_image_loading.c)
+
 ## Features
 
 - Load various assets from data archives, including Images, Textures, Music, Waves, Fonts, Text, Data and Shaders

@@ -27,7 +27,7 @@ int main(void)
 
     // Initialize the file system, and mount a directory.
     InitPhysFS();
-    MountPhysFS("resources", "res");
+    MountPhysFS("resources/resources.zip", "res");
 
     // Load the image directly into a texture through PhysFS.
     Texture2D texture = LoadTextureFromPhysFS("res/raylib_logo.png");
@@ -49,7 +49,7 @@ int main(void)
 
             DrawTexture(texture, screenWidth/2 - texture.width/2, screenHeight/2 - texture.height/2, WHITE);
 
-            DrawText("this IS a texture loaded from an image!", 300, 370, 10, GRAY);
+            DrawText("this IS a texture loaded from a .zip file!", 300, 370, 10, GRAY);
 
         EndDrawing();
         //----------------------------------------------------------------------------------
