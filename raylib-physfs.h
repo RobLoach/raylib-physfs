@@ -100,7 +100,7 @@ extern "C" {
  * @internal
  */
 void TracePhysFSError(const char* detail) {
-    int errorCode = PHYSFS_getLastErrorCode();
+    PHYSFS_ErrorCode errorCode = PHYSFS_getLastErrorCode();
     if (errorCode == PHYSFS_ERR_OK) {
         TraceLog(LOG_WARNING, TextFormat("PHYSFS: %s", detail));
     } else {
@@ -127,7 +127,7 @@ unsigned char* LoadFileDataFromPhysFS(const char* fileName, unsigned int* bytesR
     }
 
     // Open up the file.
-    void* handle = PHYSFS_openRead(fileName);
+    PHYSFS_File* handle = PHYSFS_openRead(fileName);
     if (handle == 0) {
         TracePhysFSError(fileName);
         *bytesRead = 0;
@@ -164,7 +164,7 @@ unsigned char* LoadFileDataFromPhysFS(const char* fileName, unsigned int* bytesR
     // Close the file handle, and return the bytes read and the buffer.
     PHYSFS_close(handle);
     *bytesRead = read;
-    return buffer;
+    return (unsigned char*) buffer;
 }
 
 /**
@@ -519,7 +519,7 @@ bool SaveFileDataToPhysFS(const char* fileName, void* data, unsigned int bytesTo
     }
 
     // Open the file.
-    void* handle = PHYSFS_openWrite(fileName);
+    PHYSFS_File* handle = PHYSFS_openWrite(fileName);
     if (handle == 0) {
         TracePhysFSError(fileName);
         return false;
