@@ -1,11 +1,11 @@
 /**********************************************************************************************
 *
-*   raylib-physfs - Integrate PhysFS with raylib, allowing to load images, audio and fonts from data archives.
+*   raylib-physfs 4.5.0 - Integrate PhysFS with raylib, allowing to load images, audio and fonts from data archives.
 *
 *   Copyright 2021 Rob Loach (@RobLoach)
 *
 *   DEPENDENCIES:
-*       raylib 4.2+ https://www.raylib.com/
+*       raylib 4.5+ https://www.raylib.com/
 *       physfs https://github.com/icculus/physfs
 *
 *   LICENSE: zlib/libpng
