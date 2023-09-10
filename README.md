@@ -94,6 +94,11 @@ cd examples
 ./textures_image_loading
 ```
 
+## Alternatives
+
+While physfs is great, there are alternative file systems available...
+- [raylib-assetsys](https://github.com/RobLoach/raylib-assetsys)
+
 ## License
 
 *raylib-physfs* is licensed under an unmodified zlib/libpng license, which is an OSI-certified, BSD-like license that allows static linking with closed source software. Check [LICENSE](LICENSE) for further details.
