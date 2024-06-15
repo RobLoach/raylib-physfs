@@ -11,6 +11,7 @@ set(PHYSFS_ARCHIVE_QPAK OFF CACHE BOOL "" FORCE)
 set(PHYSFS_ARCHIVE_SLB OFF CACHE BOOL "" FORCE)
 set(PHYSFS_ARCHIVE_ISO9660 OFF CACHE BOOL "" FORCE)
 set(PHYSFS_ARCHIVE_VDF OFF CACHE BOOL "" FORCE)
+set(PHYSFS_TARGETNAME_UNINSTALL "physfs_uninstall" CACHE STRING "" FORCE)
 
 # library options
 set(PHYSFS_BUILD_STATIC ON CACHE BOOL "" FORCE)
@@ -23,7 +24,7 @@ include(FetchContent)
 FetchContent_Declare(
     physfs
     GIT_REPOSITORY https://github.com/icculus/physfs.git
-    GIT_TAG release-3.2.0
+    GIT_TAG 31209b7c2ce629dbda0db2329ce469ab9a2b90b9
 )
 FetchContent_MakeAvailable(physfs)
 include_directories(${physfs_SOURCE_DIR}/src)

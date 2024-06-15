@@ -1,11 +1,11 @@
 /**********************************************************************************************
 *
-*   raylib-physfs 4.5.0 - Integrate PhysFS with raylib, allowing to load images, audio and fonts from data archives.
+*   raylib-physfs 5.0.0 - Integrate PhysFS with raylib, allowing to load images, audio and fonts from data archives.
 *
 *   Copyright 2021 Rob Loach (@RobLoach)
 *
 *   DEPENDENCIES:
-*       raylib 4.5+ https://www.raylib.com/
+*       raylib 5.0+ https://www.raylib.com/
 *       physfs https://github.com/icculus/physfs
 *
 *   LICENSE: zlib/libpng
@@ -54,10 +54,10 @@ RAYLIB_PHYSFS_DEF bool MountPhysFSFromMemory(const unsigned char *fileData, int 
 RAYLIB_PHYSFS_DEF bool UnmountPhysFS(const char* oldDir);                         // Unmounts the given directory
 RAYLIB_PHYSFS_DEF bool FileExistsInPhysFS(const char* fileName);                  // Check if the given file exists in PhysFS
 RAYLIB_PHYSFS_DEF bool DirectoryExistsInPhysFS(const char* dirPath);              // Check if the given directory exists in PhysFS
-RAYLIB_PHYSFS_DEF unsigned char* LoadFileDataFromPhysFS(const char* fileName, unsigned int* bytesRead);  // Load a data buffer from PhysFS (memory should be freed)
+RAYLIB_PHYSFS_DEF unsigned char* LoadFileDataFromPhysFS(const char* fileName, int* bytesRead);  // Load a data buffer from PhysFS (memory should be freed)
 RAYLIB_PHYSFS_DEF char* LoadFileTextFromPhysFS(const char* fileName);             // Load text from a file (memory should be freed)
 RAYLIB_PHYSFS_DEF bool SetPhysFSWriteDirectory(const char* newDir);               // Set the base directory where PhysFS should write files to (defaults to the current working directory)
-RAYLIB_PHYSFS_DEF bool SaveFileDataToPhysFS(const char* fileName, void* data, unsigned int bytesToWrite);  // Save the given file data in PhysFS
+RAYLIB_PHYSFS_DEF bool SaveFileDataToPhysFS(const char* fileName, void* data, int bytesToWrite);  // Save the given file data in PhysFS
 RAYLIB_PHYSFS_DEF bool SaveFileTextToPhysFS(const char* fileName, char* text);    // Save the given file text in PhysFS
 RAYLIB_PHYSFS_DEF FilePathList LoadDirectoryFilesFromPhysFS(const char* dirPath);  // Get filenames in a directory path (memory should be freed)
 RAYLIB_PHYSFS_DEF long GetFileModTimeFromPhysFS(const char* fileName);            // Get file modification time (last write time) from PhysFS
@@ -80,7 +80,7 @@ RAYLIB_PHYSFS_DEF const char* GetPerfDirectory(const char *organization, const c
 #ifndef RAYLIB_PHYSFS_IMPLEMENTATION_ONCE
 #define RAYLIB_PHYSFS_IMPLEMENTATION_ONCE
 
-// MiniPhysFS
+// PhysFS
 #define PHYSFS_IMPL
 #define PHYSFS_PLATFORM_IMPL
 #define PHYSFS_DECL RAYLIB_PHYSFS_DEF
@@ -113,13 +113,13 @@ void TracePhysFSError(const char* detail) {
  * Loads the given file as a byte array from PhysFS (read).
  *
  * @param fileName The file to load.
- * @param bytesRead An unsigned integer to save the bytes that were read.
+ * @param bytesRead An integer to save the bytes that were read.
  *
  * @return The file data as a pointer. Make sure to use UnloadFileData() when finished using the file data.
  *
  * @see UnloadFileData()
  */
-unsigned char* LoadFileDataFromPhysFS(const char* fileName, unsigned int* bytesRead) {
+unsigned char* LoadFileDataFromPhysFS(const char* fileName, int* bytesRead) {
     if (!FileExistsInPhysFS(fileName)) {
         TraceLog(LOG_WARNING, TextFormat("PHYSFS: Tried to load unexisting file '%s'", fileName));
         *bytesRead = 0;
@@ -320,7 +320,7 @@ bool DirectoryExistsInPhysFS(const char* dirPath) {
  * @return The loaded image on success. An empty Image otherwise.
  */
 Image LoadImageFromPhysFS(const char* fileName) {
-    unsigned int bytesRead;
+    int bytesRead;
     unsigned char* fileData = LoadFileDataFromPhysFS(fileName, &bytesRead);
     if (bytesRead == 0) {
         struct Image output;
@@ -371,8 +371,23 @@ Texture2D LoadTextureFromPhysFS(const char* fileName) {
  * @see UnloadFileText()
  */
 char* LoadFileTextFromPhysFS(const char *fileName) {
-    unsigned int bytesRead;
-    return (char*)LoadFileDataFromPhysFS(fileName, &bytesRead);
+    int bytesRead;
+    unsigned char* data = LoadFileDataFromPhysFS(fileName, &bytesRead);
+    if (bytesRead == 0) {
+        return 0;
+    }
+
+    // Copy the data, and append a null terminator.
+    char* text = (char*)MemAlloc(bytesRead + 1);
+    for (int i = 0; i < bytesRead; i++) {
+        text[i] = (char)data[i];
+    }
+    text[bytesRead] = '\0';
+
+    // Free the original data, and return the string.
+    MemFree(data);
+
+    return text;
 }
 
 /**
@@ -512,7 +527,7 @@ bool SetPhysFSWriteDirectory(const char* newDir) {
  *
  * @return True on success, false on failure.
  */
-bool SaveFileDataToPhysFS(const char* fileName, void* data, unsigned int bytesToWrite) {
+bool SaveFileDataToPhysFS(const char* fileName, void* data, int bytesToWrite) {
     // Protect against empty writes.
     if (bytesToWrite == 0) {
         return true;
