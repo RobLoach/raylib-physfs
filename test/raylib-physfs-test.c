@@ -80,6 +80,40 @@ int main(int argc, char *argv[]) {
         Assert(textFileFound, "LoadDirectoryFilesFromPhysFS() could not find text.txt");
     }
 
+    // LoadDirectoryFilesExFromPhysFS()
+    {
+        // Scan all files recursively (should include subdir/text2.txt)
+        FilePathList allFiles = LoadDirectoryFilesExFromPhysFS("assets", NULL, true);
+        Assert(allFiles.count > 4, "LoadDirectoryFilesExFromPhysFS() should find files recursively");
+        bool subdirFileFound = false;
+        for (unsigned int i = 0; i < allFiles.count; i++) {
+            if (TextIsEqual(GetFileName(allFiles.paths[i]), "text2.txt")) {
+                subdirFileFound = true;
+            }
+        }
+        UnloadDirectoryFiles(allFiles);
+        Assert(subdirFileFound, "LoadDirectoryFilesExFromPhysFS() should find text2.txt in subdir");
+
+        // Filter by extension
+        FilePathList pngFiles = LoadDirectoryFilesExFromPhysFS("assets", ".png", true);
+        Assert(pngFiles.count >= 1, "LoadDirectoryFilesExFromPhysFS() should find .png files");
+        for (unsigned int i = 0; i < pngFiles.count; i++) {
+            Assert(TextIsEqual(GetFileExtension(pngFiles.paths[i]), ".png"), "LoadDirectoryFilesExFromPhysFS() filter should only return .png files");
+        }
+        UnloadDirectoryFiles(pngFiles);
+
+        // No subdirs scan should match LoadDirectoryFilesFromPhysFS behaviour
+        FilePathList flatFiles = LoadDirectoryFilesExFromPhysFS("assets", NULL, false);
+        FilePathList flatRef = LoadDirectoryFilesFromPhysFS("assets");
+        AssertEqual(flatFiles.count, flatRef.count);
+        UnloadDirectoryFiles(flatFiles);
+        UnloadDirectoryFiles(flatRef);
+
+        // Missing directory returns empty list
+        FilePathList missing = LoadDirectoryFilesExFromPhysFS("MissingDirectory", NULL, true);
+        AssertEqual(missing.count, 0);
+    }
+
     // LoadFileTextFromPhysFS()
     {
         char* fileText = LoadFileTextFromPhysFS("assets/text.txt");

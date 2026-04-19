@@ -56,6 +56,7 @@ RAYLIB_PHYSFS_DEF bool SetPhysFSWriteDirectory(const char* newDir);             
 RAYLIB_PHYSFS_DEF bool SaveFileDataToPhysFS(const char* fileName, void* data, int bytesToWrite);  // Save the given file data in PhysFS
 RAYLIB_PHYSFS_DEF bool SaveFileTextToPhysFS(const char* fileName, const char* text);    // Save the given file text in PhysFS
 RAYLIB_PHYSFS_DEF FilePathList LoadDirectoryFilesFromPhysFS(const char* dirPath);  // Get filenames in a directory path (memory should be freed)
+RAYLIB_PHYSFS_DEF FilePathList LoadDirectoryFilesExFromPhysFS(const char *basePath, const char *filter, bool scanSubdirs);  // Get filenames in a directory path with optional extension filter and recursive scanning (memory should be freed)
 RAYLIB_PHYSFS_DEF long GetFileModTimeFromPhysFS(const char* fileName);            // Get file modification time (last write time) from PhysFS
 RAYLIB_PHYSFS_DEF Image LoadImageFromPhysFS(const char* fileName);                // Load an image from PhysFS
 RAYLIB_PHYSFS_DEF Texture2D LoadTextureFromPhysFS(const char* fileName);          // Load a texture from PhysFS
@@ -583,6 +584,106 @@ FilePathList LoadDirectoryFilesFromPhysFS(const char* dirPath) {
 
     PHYSFS_freeList(physfsList);
     return output;
+}
+
+/**
+ * Recursively count files in a PhysFS directory with optional extension filter.
+ */
+static int CountFilesFromPhysFS(const char* dirPath, const char* filter, bool scanSubdirs) {
+    char** physfsList = PHYSFS_enumerateFiles(dirPath);
+    int count = 0;
+
+    for (char** i = physfsList; *i != NULL; i++) {
+        char path[4096];
+        if (TextLength(dirPath) > 0) {
+            snprintf(path, sizeof(path), "%s/%s", dirPath, *i);
+        } else {
+            snprintf(path, sizeof(path), "%s", *i);
+        }
+
+        PHYSFS_Stat stat;
+        if (PHYSFS_stat(path, &stat) != 0) {
+            if (stat.filetype == PHYSFS_FILETYPE_DIRECTORY) {
+                if (scanSubdirs) {
+                    count += CountFilesFromPhysFS(path, filter, scanSubdirs);
+                }
+            } else if (stat.filetype == PHYSFS_FILETYPE_REGULAR) {
+                if (filter == NULL || TextIsEqual(GetFileExtension(path), filter)) {
+                    count++;
+                }
+            }
+        }
+    }
+
+    PHYSFS_freeList(physfsList);
+    return count;
+}
+
+/**
+ * Recursively fill files into a FilePathList from a PhysFS directory.
+ */
+static void FillFilesFromPhysFS(const char* dirPath, const char* filter, bool scanSubdirs, FilePathList* files) {
+    char** physfsList = PHYSFS_enumerateFiles(dirPath);
+
+    for (char** i = physfsList; *i != NULL; i++) {
+        char path[4096];
+        if (TextLength(dirPath) > 0) {
+            snprintf(path, sizeof(path), "%s/%s", dirPath, *i);
+        } else {
+            snprintf(path, sizeof(path), "%s", *i);
+        }
+
+        PHYSFS_Stat stat;
+        if (PHYSFS_stat(path, &stat) != 0) {
+            if (stat.filetype == PHYSFS_FILETYPE_DIRECTORY) {
+                if (scanSubdirs) {
+                    FillFilesFromPhysFS(path, filter, scanSubdirs, files);
+                }
+            } else if (stat.filetype == PHYSFS_FILETYPE_REGULAR) {
+                if (filter == NULL || TextIsEqual(GetFileExtension(path), filter)) {
+                    unsigned int len = TextLength(path);
+                    files->paths[files->count] = (char*)MemAlloc(len + 1);
+                    RAYLIB_PHYSFS_MEMCPY(files->paths[files->count], path, len + 1);
+                    files->count++;
+                }
+            }
+        }
+    }
+
+    PHYSFS_freeList(physfsList);
+}
+
+/**
+ * Gets a list of files in the given directory in PhysFS, with optional extension filter and subdirectory scanning.
+ *
+ * Make sure to clear the loaded list by using UnloadDirectoryFiles().
+ *
+ * @param basePath The base directory to scan.
+ * @param filter Optional file extension filter (e.g. ".png"). Pass NULL to include all files.
+ * @param scanSubdirs When true, recursively scans subdirectories.
+ *
+ * @see UnloadDirectoryFiles()
+ * @see LoadDirectoryFilesFromPhysFS()
+ */
+FilePathList LoadDirectoryFilesExFromPhysFS(const char* basePath, const char* filter, bool scanSubdirs) {
+    FilePathList out = { 0 };
+
+    if (!DirectoryExistsInPhysFS(basePath)) {
+        TraceLog(LOG_WARNING, "PHYSFS: Can't get files from non-existent directory (%s)", basePath);
+        return out;
+    }
+
+    int count = CountFilesFromPhysFS(basePath, filter, scanSubdirs);
+
+    out.capacity = (unsigned int)count;
+    out.count = 0;
+    out.paths = count > 0 ? (char**)MemAlloc(count * sizeof(char*)) : 0;
+
+    if (count > 0) {
+        FillFilesFromPhysFS(basePath, filter, scanSubdirs, &out);
+    }
+
+    return out;
 }
 
 /**
