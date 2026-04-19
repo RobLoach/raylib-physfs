@@ -578,9 +578,8 @@ FilePathList LoadDirectoryFilesFromPhysFS(const char* dirPath) {
     output.count = count;
     output.paths = count > 0 ? (char**)MemAlloc(count * sizeof(char*)) : 0;
     for (int i = 0; i < count; i++) {
-        unsigned int len = TextLength(physfsList[i]);
-        output.paths[i] = (char*)MemAlloc(len + 1);
-        RAYLIB_PHYSFS_MEMCPY(output.paths[i], physfsList[i], len + 1);
+        output.paths[i] = (char*)MemAlloc(TextLength(physfsList[i]) + 1);
+        TextCopy(output.paths[i], physfsList[i]);
     }
 
     PHYSFS_freeList(physfsList);
@@ -610,9 +609,8 @@ static int EnumerateFilesFromPhysFS(const char* dirPath, const char* filter, boo
         } else if (stat.filetype == PHYSFS_FILETYPE_REGULAR) {
             if (filter == NULL || TextIsEqual(GetFileExtension(path), filter)) {
                 if (files != NULL) {
-                    unsigned int len = TextLength(path);
-                    files->paths[files->count] = (char*)MemAlloc(len + 1);
-                    RAYLIB_PHYSFS_MEMCPY(files->paths[files->count], path, len + 1);
+                    files->paths[files->count] = (char*)MemAlloc(TextLength(path) + 1);
+                    TextCopy(files->paths[files->count], path);
                     files->count++;
                 }
                 count++;
