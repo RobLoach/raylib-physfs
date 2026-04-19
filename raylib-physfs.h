@@ -565,10 +565,15 @@ FilePathList LoadDirectoryFilesFromPhysFS(const char* dirPath) {
 
     // Load the list of files from PhysFS into a temporary PhysFS-owned list.
     char** physfsList = PHYSFS_enumerateFiles(dirPath);
+    if (physfsList == NULL) {
+        TracePhysFSError(dirPath);
+        FilePathList out = { 0 };
+        return out;
+    }
 
     // Count the files.
     int count = 0;
-    for (char** i = physfsList; *i != 0; i++) {
+    for (char** i = physfsList; *i != NULL; i++) {
         count++;
     }
 
@@ -576,7 +581,7 @@ FilePathList LoadDirectoryFilesFromPhysFS(const char* dirPath) {
     FilePathList output = { 0 };
     output.capacity = (unsigned int)count;
     output.count = count;
-    output.paths = count > 0 ? (char**)MemAlloc(count * sizeof(char*)) : 0;
+    output.paths = count > 0 ? (char**)MemAlloc(count * sizeof(char*)) : NULL;
     for (int i = 0; i < count; i++) {
         output.paths[i] = (char*)MemAlloc(TextLength(physfsList[i]) + 1);
         TextCopy(output.paths[i], physfsList[i]);
@@ -593,6 +598,7 @@ FilePathList LoadDirectoryFilesFromPhysFS(const char* dirPath) {
  */
 static int EnumerateFilesFromPhysFS(const char* dirPath, const char* filter, bool scanSubdirs, FilePathList* files) {
     char** physfsList = PHYSFS_enumerateFiles(dirPath);
+    if (physfsList == NULL) return 0;
     int count = 0;
 
     for (char** i = physfsList; *i != NULL; i++) {
@@ -645,7 +651,7 @@ FilePathList LoadDirectoryFilesExFromPhysFS(const char* basePath, const char* fi
     int count = EnumerateFilesFromPhysFS(basePath, filter, scanSubdirs, NULL);
 
     out.capacity = (unsigned int)count;
-    out.paths = count > 0 ? (char**)MemAlloc(count * sizeof(char*)) : 0;
+    out.paths = count > 0 ? (char**)MemAlloc(count * sizeof(char*)) : NULL;
 
     if (count > 0) {
         EnumerateFilesFromPhysFS(basePath, filter, scanSubdirs, &out);
