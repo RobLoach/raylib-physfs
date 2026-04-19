@@ -573,7 +573,8 @@ FilePathList LoadDirectoryFilesFromPhysFS(const char* dirPath) {
     }
 
     // Copy into raylib-allocated memory so UnloadDirectoryFiles() can free it correctly.
-    FilePathList output;
+    FilePathList output = { 0 };
+    output.capacity = (unsigned int)count;
     output.count = count;
     output.paths = count > 0 ? (char**)MemAlloc(count * sizeof(char*)) : 0;
     for (int i = 0; i < count; i++) {
@@ -587,70 +588,40 @@ FilePathList LoadDirectoryFilesFromPhysFS(const char* dirPath) {
 }
 
 /**
- * Recursively count files in a PhysFS directory with optional extension filter.
+ * Enumerate matching files in a PhysFS directory, recursively if requested.
+ * When files is NULL, returns the count only (counting pass).
+ * When files is non-NULL, fills files->paths and increments files->count (filling pass).
  */
-static int CountFilesFromPhysFS(const char* dirPath, const char* filter, bool scanSubdirs) {
+static int EnumerateFilesFromPhysFS(const char* dirPath, const char* filter, bool scanSubdirs, FilePathList* files) {
     char** physfsList = PHYSFS_enumerateFiles(dirPath);
     int count = 0;
 
     for (char** i = physfsList; *i != NULL; i++) {
         char path[4096];
-        if (TextLength(dirPath) > 0) {
-            snprintf(path, sizeof(path), "%s/%s", dirPath, *i);
-        } else {
-            snprintf(path, sizeof(path), "%s", *i);
-        }
+        snprintf(path, sizeof(path), "%s/%s", dirPath, *i);
 
         PHYSFS_Stat stat;
-        if (PHYSFS_stat(path, &stat) != 0) {
-            if (stat.filetype == PHYSFS_FILETYPE_DIRECTORY) {
-                if (scanSubdirs) {
-                    count += CountFilesFromPhysFS(path, filter, scanSubdirs);
+        if (PHYSFS_stat(path, &stat) == 0) continue;
+
+        if (stat.filetype == PHYSFS_FILETYPE_DIRECTORY) {
+            if (scanSubdirs) {
+                count += EnumerateFilesFromPhysFS(path, filter, scanSubdirs, files);
+            }
+        } else if (stat.filetype == PHYSFS_FILETYPE_REGULAR) {
+            if (filter == NULL || TextIsEqual(GetFileExtension(path), filter)) {
+                if (files != NULL) {
+                    unsigned int len = TextLength(path);
+                    files->paths[files->count] = (char*)MemAlloc(len + 1);
+                    RAYLIB_PHYSFS_MEMCPY(files->paths[files->count], path, len + 1);
+                    files->count++;
                 }
-            } else if (stat.filetype == PHYSFS_FILETYPE_REGULAR) {
-                if (filter == NULL || TextIsEqual(GetFileExtension(path), filter)) {
-                    count++;
-                }
+                count++;
             }
         }
     }
 
     PHYSFS_freeList(physfsList);
     return count;
-}
-
-/**
- * Recursively fill files into a FilePathList from a PhysFS directory.
- */
-static void FillFilesFromPhysFS(const char* dirPath, const char* filter, bool scanSubdirs, FilePathList* files) {
-    char** physfsList = PHYSFS_enumerateFiles(dirPath);
-
-    for (char** i = physfsList; *i != NULL; i++) {
-        char path[4096];
-        if (TextLength(dirPath) > 0) {
-            snprintf(path, sizeof(path), "%s/%s", dirPath, *i);
-        } else {
-            snprintf(path, sizeof(path), "%s", *i);
-        }
-
-        PHYSFS_Stat stat;
-        if (PHYSFS_stat(path, &stat) != 0) {
-            if (stat.filetype == PHYSFS_FILETYPE_DIRECTORY) {
-                if (scanSubdirs) {
-                    FillFilesFromPhysFS(path, filter, scanSubdirs, files);
-                }
-            } else if (stat.filetype == PHYSFS_FILETYPE_REGULAR) {
-                if (filter == NULL || TextIsEqual(GetFileExtension(path), filter)) {
-                    unsigned int len = TextLength(path);
-                    files->paths[files->count] = (char*)MemAlloc(len + 1);
-                    RAYLIB_PHYSFS_MEMCPY(files->paths[files->count], path, len + 1);
-                    files->count++;
-                }
-            }
-        }
-    }
-
-    PHYSFS_freeList(physfsList);
 }
 
 /**
@@ -673,14 +644,13 @@ FilePathList LoadDirectoryFilesExFromPhysFS(const char* basePath, const char* fi
         return out;
     }
 
-    int count = CountFilesFromPhysFS(basePath, filter, scanSubdirs);
+    int count = EnumerateFilesFromPhysFS(basePath, filter, scanSubdirs, NULL);
 
     out.capacity = (unsigned int)count;
-    out.count = 0;
     out.paths = count > 0 ? (char**)MemAlloc(count * sizeof(char*)) : 0;
 
     if (count > 0) {
-        FillFilesFromPhysFS(basePath, filter, scanSubdirs, &out);
+        EnumerateFilesFromPhysFS(basePath, filter, scanSubdirs, &out);
     }
 
     return out;

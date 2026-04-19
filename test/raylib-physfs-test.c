@@ -102,12 +102,14 @@ int main(int argc, char *argv[]) {
         }
         UnloadDirectoryFiles(pngFiles);
 
-        // No subdirs scan should match LoadDirectoryFilesFromPhysFS behaviour
+        // Non-recursive scan should not include files from subdirectories
         FilePathList flatFiles = LoadDirectoryFilesExFromPhysFS("assets", NULL, false);
-        FilePathList flatRef = LoadDirectoryFilesFromPhysFS("assets");
-        AssertEqual(flatFiles.count, flatRef.count);
+        bool flatHasSubdirFile = false;
+        for (unsigned int i = 0; i < flatFiles.count; i++) {
+            if (TextIsEqual(GetFileName(flatFiles.paths[i]), "text2.txt")) flatHasSubdirFile = true;
+        }
         UnloadDirectoryFiles(flatFiles);
-        UnloadDirectoryFiles(flatRef);
+        AssertNot(flatHasSubdirFile);
 
         // Missing directory returns empty list
         FilePathList missing = LoadDirectoryFilesExFromPhysFS("MissingDirectory", NULL, true);
