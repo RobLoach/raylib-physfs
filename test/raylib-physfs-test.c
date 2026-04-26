@@ -181,8 +181,23 @@ int main(int argc, char *argv[]) {
     Assert(UnmountPhysFS("resources"));
     AssertNot(UnmountPhysFS("MissingDirectory"));
 
-    // SetPhysFSCallbacks()
-    SetPhysFSCallbacks();
+    // SetPhysFSCallbacks() - verify standard raylib file I/O routes through PhysFS
+    {
+        Assert(MountPhysFS("resources", "assets"));
+        SetPhysFSCallbacks();
+
+        int bytesRead = 0;
+        unsigned char* data = LoadFileData("assets/text.txt", &bytesRead);
+        Assert(data != NULL, "SetPhysFSCallbacks() should route LoadFileData() through PhysFS");
+        Assert(bytesRead > 0);
+        UnloadFileData(data);
+
+        char* text = LoadFileText("assets/text.txt");
+        AssertNotEqual(text, 0, "SetPhysFSCallbacks() should route LoadFileText() through PhysFS");
+        UnloadFileText(text);
+
+        Assert(UnmountPhysFS("resources"));
+    }
 
     // GetPrefDirectory
     const char* perfDir = GetPrefDirectory("RobLoach", "raylib-physfs-test");
