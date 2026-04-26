@@ -85,9 +85,17 @@ RAYLIB_PHYSFS_DEF const char* GetPrefDirectory(const char *organization, const c
 
 // PhysFS
 #define PHYSFS_IMPL
-#define PHYSFS_PLATFORM_IMPL
 #define PHYSFS_DECL RAYLIB_PHYSFS_DEF
+#ifndef PHYSFS_PLATFORM_RAYLIB
+    #define PHYSFS_PLATFORM_IMPL
+#endif
 #include "physfs.h"
+
+// Raylib platform: provides __PHYSFS_platform* using raylib's file API.
+// Enable by defining PHYSFS_PLATFORM_RAYLIB before the implementation.
+#ifdef PHYSFS_PLATFORM_RAYLIB
+    #include "physfs_platform_raylib.c"
+#endif
 
 #ifdef __cplusplus
 extern "C" {
