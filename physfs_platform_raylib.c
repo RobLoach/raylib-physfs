@@ -17,7 +17,7 @@
  *   #include "raylib-physfs.h"
  */
 
-#include <string.h>  /* memcpy, memset */
+#include <string.h>  /* memset */
 #include <stdio.h>   /* remove() */
 
 /* -------------------------------------------------------------------------
@@ -56,19 +56,21 @@ void __PHYSFS_platformDetectAvailableCDs(PHYSFS_StringCallback cb, void *data)
  * Path resolution
  * ---------------------------------------------------------------------- */
 
-/* Returns an allocator-owned copy of a path, ensuring it ends with '/'. */
+/* Returns a MemAlloc-owned copy of a path, ensuring it ends with '/'. */
 static char *platformDupWithSep(const char *path)
 {
-    size_t len = strlen(path);
+    unsigned int len = TextLength(path);
     int needSep = (len == 0 || path[len - 1] != '/');
-    char *result = (char *)allocator.Malloc(len + needSep + 1);
+    char *result = (char *)MemAlloc(len + needSep + 1);
     if (result == NULL) {
         PHYSFS_setErrorCode(PHYSFS_ERR_OUT_OF_MEMORY);
         return NULL;
     }
-    memcpy(result, path, len);
-    if (needSep) result[len++] = '/';
-    result[len] = '\0';
+    TextCopy(result, path);
+    if (needSep) {
+        result[len]     = '/';
+        result[len + 1] = '\0';
+    }
     return result;
 }
 
@@ -85,27 +87,23 @@ char *__PHYSFS_platformCalcUserDir(void)
 
 char *__PHYSFS_platformCalcPrefDir(const char *org, const char *app)
 {
-    const char *base = GetApplicationDirectory();
-    size_t baselen = strlen(base);
-    size_t orglen  = strlen(org);
-    size_t applen  = strlen(app);
+    const char *base     = GetApplicationDirectory();
+    unsigned int baselen = TextLength(base);
+    unsigned int orglen  = TextLength(org);
+    unsigned int applen  = TextLength(app);
     /* base [/] org / app / \0 */
-    size_t total = baselen + 1 + orglen + 1 + applen + 2;
-    char *result = (char *)allocator.Malloc(total);
+    unsigned int total = baselen + 1 + orglen + 1 + applen + 2;
+    char *result = (char *)MemAlloc(total);
     if (result == NULL) {
         PHYSFS_setErrorCode(PHYSFS_ERR_OUT_OF_MEMORY);
         return NULL;
     }
-    size_t pos = 0;
-    memcpy(result + pos, base, baselen);
-    pos += baselen;
+    int pos = TextCopy(result, base);
     if (baselen == 0 || base[baselen - 1] != '/')
         result[pos++] = '/';
-    memcpy(result + pos, org, orglen);
-    pos += orglen;
+    pos += TextCopy(result + pos, org);
     result[pos++] = '/';
-    memcpy(result + pos, app, applen);
-    pos += applen;
+    pos += TextCopy(result + pos, app);
     result[pos++] = '/';
     result[pos]   = '\0';
     return result;
@@ -202,23 +200,23 @@ void *__PHYSFS_platformOpenRead(const char *filename)
         return NULL;
     }
 
-    PhysFSRaylibHandle *h = (PhysFSRaylibHandle *)allocator.Malloc(sizeof(*h));
+    PhysFSRaylibHandle *h = (PhysFSRaylibHandle *)MemAlloc(sizeof(*h));
     if (h == NULL) {
         UnloadFileData(raw);
         PHYSFS_setErrorCode(PHYSFS_ERR_OUT_OF_MEMORY);
         return NULL;
     }
 
-    /* Copy into allocator-owned memory for consistent lifetime management. */
-    h->data = (unsigned char *)allocator.Malloc((size_t)bytesRead);
+    /* Copy into MemAlloc-owned memory for consistent lifetime management. */
+    h->data = (unsigned char *)MemAlloc((unsigned int)bytesRead);
     if (h->data == NULL) {
         UnloadFileData(raw);
-        allocator.Free(h);
+        MemFree(h);
         PHYSFS_setErrorCode(PHYSFS_ERR_OUT_OF_MEMORY);
         return NULL;
     }
 
-    memcpy(h->data, raw, (size_t)bytesRead);
+    RAYLIB_PHYSFS_MEMCPY(h->data, raw, (size_t)bytesRead);
     UnloadFileData(raw);
     h->size     = (PHYSFS_uint64)bytesRead;
     h->pos      = 0;
@@ -228,20 +226,19 @@ void *__PHYSFS_platformOpenRead(const char *filename)
 
 static void *openWritable(const char *filename, int append)
 {
-    PhysFSRaylibHandle *h = (PhysFSRaylibHandle *)allocator.Malloc(sizeof(*h));
+    PhysFSRaylibHandle *h = (PhysFSRaylibHandle *)MemAlloc(sizeof(*h));
     if (h == NULL) {
         PHYSFS_setErrorCode(PHYSFS_ERR_OUT_OF_MEMORY);
         return NULL;
     }
 
-    size_t fnlen = strlen(filename) + 1;
-    h->filename = (char *)allocator.Malloc(fnlen);
+    h->filename = (char *)MemAlloc(TextLength(filename) + 1);
     if (h->filename == NULL) {
-        allocator.Free(h);
+        MemFree(h);
         PHYSFS_setErrorCode(PHYSFS_ERR_OUT_OF_MEMORY);
         return NULL;
     }
-    memcpy(h->filename, filename, fnlen);
+    TextCopy(h->filename, filename);
 
     h->data = NULL;
     h->size = 0;
@@ -251,15 +248,15 @@ static void *openWritable(const char *filename, int append)
         int bytesRead = 0;
         unsigned char *raw = LoadFileData(filename, &bytesRead);
         if (raw != NULL && bytesRead > 0) {
-            h->data = (unsigned char *)allocator.Malloc((size_t)bytesRead);
+            h->data = (unsigned char *)MemAlloc((unsigned int)bytesRead);
             if (h->data == NULL) {
                 UnloadFileData(raw);
-                allocator.Free(h->filename);
-                allocator.Free(h);
+                MemFree(h->filename);
+                MemFree(h);
                 PHYSFS_setErrorCode(PHYSFS_ERR_OUT_OF_MEMORY);
                 return NULL;
             }
-            memcpy(h->data, raw, (size_t)bytesRead);
+            RAYLIB_PHYSFS_MEMCPY(h->data, raw, (size_t)bytesRead);
             UnloadFileData(raw);
             h->size = (PHYSFS_uint64)bytesRead;
             h->pos  = h->size;
@@ -287,7 +284,7 @@ PHYSFS_sint64 __PHYSFS_platformRead(void *opaque, void *buf, PHYSFS_uint64 len)
     PHYSFS_uint64 remaining = h->size - h->pos;
     PHYSFS_uint64 toRead    = (len < remaining) ? len : remaining;
     if (toRead > 0) {
-        memcpy(buf, h->data + h->pos, (size_t)toRead);
+        RAYLIB_PHYSFS_MEMCPY(buf, h->data + h->pos, (size_t)toRead);
         h->pos += toRead;
     }
     return (PHYSFS_sint64)toRead;
@@ -299,7 +296,7 @@ PHYSFS_sint64 __PHYSFS_platformWrite(void *opaque, const void *buf, PHYSFS_uint6
     PHYSFS_uint64 needed = h->pos + len;
 
     if (needed > h->size) {
-        unsigned char *newdata = (unsigned char *)allocator.Realloc(h->data, (size_t)needed);
+        unsigned char *newdata = (unsigned char *)MemRealloc(h->data, (unsigned int)needed);
         if (newdata == NULL) {
             PHYSFS_setErrorCode(PHYSFS_ERR_OUT_OF_MEMORY);
             return -1;
@@ -308,7 +305,7 @@ PHYSFS_sint64 __PHYSFS_platformWrite(void *opaque, const void *buf, PHYSFS_uint6
         h->size = needed;
     }
 
-    memcpy(h->data + h->pos, buf, (size_t)len);
+    RAYLIB_PHYSFS_MEMCPY(h->data + h->pos, buf, (size_t)len);
     h->pos += len;
     return (PHYSFS_sint64)len;
 }
@@ -320,7 +317,7 @@ int __PHYSFS_platformSeek(void *opaque, PHYSFS_uint64 pos)
     /* Writable handles may seek past EOF; extend buffer with zeros. */
     if (pos > h->size) {
         if (h->filename != NULL) {
-            unsigned char *newdata = (unsigned char *)allocator.Realloc(h->data, (size_t)pos);
+            unsigned char *newdata = (unsigned char *)MemRealloc(h->data, (unsigned int)pos);
             if (newdata == NULL) {
                 PHYSFS_setErrorCode(PHYSFS_ERR_OUT_OF_MEMORY);
                 return 0;
@@ -367,9 +364,9 @@ void __PHYSFS_platformClose(void *opaque)
     if (h->filename != NULL) {
         if (h->data != NULL)
             SaveFileData(h->filename, h->data, (int)h->size);
-        allocator.Free(h->filename);
+        MemFree(h->filename);
     }
     if (h->data != NULL)
-        allocator.Free(h->data);
-    allocator.Free(h);
+        MemFree(h->data);
+    MemFree(h);
 }
