@@ -156,22 +156,24 @@ int __PHYSFS_platformStat(const char *fn, PHYSFS_Stat *stat, const int follow)
 {
     (void)follow;
 
-    if (FileExists(fn)) {
-        stat->filesize   = (PHYSFS_sint64)GetFileLength(fn);
-        stat->modtime    = (PHYSFS_sint64)GetFileModTime(fn);
-        stat->createtime = stat->modtime;
-        stat->accesstime = -1;
-        stat->filetype   = PHYSFS_FILETYPE_REGULAR;
-        stat->readonly   = 0;
-        return 1;
-    }
-
+    /* Check directory first: raylib's FileExists uses access() which returns
+     * true for directories too, so the order here matters. */
     if (DirectoryExists(fn)) {
         stat->filesize   = 0;
         stat->modtime    = -1;
         stat->createtime = -1;
         stat->accesstime = -1;
         stat->filetype   = PHYSFS_FILETYPE_DIRECTORY;
+        stat->readonly   = 0;
+        return 1;
+    }
+
+    if (FileExists(fn)) {
+        stat->filesize   = (PHYSFS_sint64)GetFileLength(fn);
+        stat->modtime    = (PHYSFS_sint64)GetFileModTime(fn);
+        stat->createtime = stat->modtime;
+        stat->accesstime = -1;
+        stat->filetype   = PHYSFS_FILETYPE_REGULAR;
         stat->readonly   = 0;
         return 1;
     }
@@ -193,6 +195,22 @@ typedef struct {
 
 void *__PHYSFS_platformOpenRead(const char *filename)
 {
+    /* Directories can't be loaded as file data. Return an empty handle so
+     * PhysFS can proceed to archiver detection; the DIR archiver will claim
+     * it via __PHYSFS_platformStat without reading any bytes. */
+    if (DirectoryExists(filename)) {
+        PhysFSRaylibHandle *h = (PhysFSRaylibHandle *)MemAlloc(sizeof(*h));
+        if (h == NULL) {
+            PHYSFS_setErrorCode(PHYSFS_ERR_OUT_OF_MEMORY);
+            return NULL;
+        }
+        h->data     = NULL;
+        h->size     = 0;
+        h->pos      = 0;
+        h->filename = NULL;
+        return h;
+    }
+
     int bytesRead = 0;
     unsigned char *raw = LoadFileData(filename, &bytesRead);
     if (raw == NULL) {

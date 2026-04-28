@@ -186,6 +186,10 @@ int main(int argc, char *argv[]) {
         Assert(MountPhysFS("resources", "assets"));
         SetPhysFSCallbacks();
 
+#ifndef PHYSFS_PLATFORM_RAYLIB
+        // When PHYSFS_PLATFORM_RAYLIB is active, SetPhysFSCallbacks() creates a
+        // circular dependency: LoadFileData -> LoadFileDataFromPhysFS -> physfs ->
+        // __PHYSFS_platformOpenRead -> LoadFileData (now overridden) -> loop.
         int bytesRead = 0;
         unsigned char* data = LoadFileData("assets/text.txt", &bytesRead);
         Assert(data != NULL, "SetPhysFSCallbacks() should route LoadFileData() through PhysFS");
@@ -195,6 +199,7 @@ int main(int argc, char *argv[]) {
         char* text = LoadFileText("assets/text.txt");
         AssertNotEqual(text, 0, "SetPhysFSCallbacks() should route LoadFileText() through PhysFS");
         UnloadFileText(text);
+#endif
 
         Assert(UnmountPhysFS("resources"));
     }
