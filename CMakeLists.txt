@@ -13,12 +13,18 @@ else()
     set(RAYLIB_PHYSFS_IS_MAIN FALSE)
 endif()
 option(RAYLIB_PHYSFS_BUILD_EXAMPLES "Examples" ${RAYLIB_PHYSFS_IS_MAIN})
+option(RAYLIB_PHYSFS_PLATFORM_RAYLIB "Use raylib as the PhysFS platform layer instead of the default OS platform" OFF)
 
 # Library
 add_library(raylib_physfs INTERFACE)
 
 # Include Directory
 target_include_directories(raylib_physfs INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/)
+
+# Propagate PHYSFS_PLATFORM_RAYLIB to all consumers of this library.
+if (RAYLIB_PHYSFS_PLATFORM_RAYLIB)
+    target_compile_definitions(raylib_physfs INTERFACE PHYSFS_PLATFORM_RAYLIB)
+endif()
 
 # Set the header files as install files.
 install(FILES raylib-physfs.h
