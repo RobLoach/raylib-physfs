@@ -31,6 +31,7 @@ int main(void)
     //--------------------------------------------------------------------------------------
     const int screenWidth = 800;
     const int screenHeight = 450;
+    SetTraceLogLevel(LOG_DEBUG);
 
     InitWindow(screenWidth, screenHeight, "raylib [core] example - PhysFS raylib platform");
 

@@ -1,38 +1,29 @@
-/*
- * Raylib platform implementation for PhysFS.
+/**
+ * raylib platform implementation for PhysFS.
  *
- * Implements the PhysFS platform abstraction layer using raylib's file I/O
- * API. This allows PhysFS to operate on any platform raylib supports without
- * requiring any platform-specific system calls.
- *
- * File handles are fully buffered in memory (using raylib's LoadFileData /
- * SaveFileData) so that seek and tell are supported despite raylib having only
- * load-all-at-once file I/O. Mutex operations are no-ops; this platform is
- * single-threaded by design, matching raylib's own threading model.
- *
- * Usage — define PHYSFS_PLATFORM_RAYLIB before including raylib-physfs.h:
+ * Define PHYSFS_PLATFORM_RAYLIB before including raylib-physfs.h:
  *
  *   #define PHYSFS_PLATFORM_RAYLIB
  *   #define RAYLIB_PHYSFS_IMPLEMENTATION
  *   #include "raylib-physfs.h"
  */
 
+#include <limits.h>  /* UINT_MAX */
 #include <string.h>  /* memset */
-#include <stdio.h>   /* remove() */
 
-/* -------------------------------------------------------------------------
- * Threading — single-threaded no-ops
- * ---------------------------------------------------------------------- */
+typedef struct {
+    unsigned char  *data;      /* file contents buffer                    */
+    PHYSFS_uint64   size;      /* current logical size of the buffer      */
+    PHYSFS_uint64   pos;       /* current read/write position             */
+    char           *filename;  /* non-NULL for writable handles           */
+} PhysFSRaylibHandle;
 
 void *__PHYSFS_platformCreateMutex(void)  { return (void *)0x1; }
 void  __PHYSFS_platformDestroyMutex(void *mutex) { (void)mutex; }
 int   __PHYSFS_platformGrabMutex(void *mutex)    { (void)mutex; return 1; }
 void  __PHYSFS_platformReleaseMutex(void *mutex) { (void)mutex; }
 void *__PHYSFS_platformGetThreadID(void)  { return (void *)0x1; }
-
-/* -------------------------------------------------------------------------
- * Lifecycle
- * ---------------------------------------------------------------------- */
+void __PHYSFS_platformDetectAvailableCDs(PHYSFS_StringCallback cb, void *data) { (void)cb; (void)data; }
 
 int __PHYSFS_platformInit(const char *argv0)
 {
@@ -46,21 +37,9 @@ void __PHYSFS_platformDeinit(void)
     TraceLog(LOG_DEBUG, "PHYSFS: platformDeinit");
 }
 
-/* -------------------------------------------------------------------------
- * CD-ROM detection — not supported
- * ---------------------------------------------------------------------- */
-
-void __PHYSFS_platformDetectAvailableCDs(PHYSFS_StringCallback cb, void *data)
-{
-    (void)cb;
-    (void)data;
-}
-
-/* -------------------------------------------------------------------------
- * Path resolution
- * ---------------------------------------------------------------------- */
-
-/* Returns a MemAlloc-owned copy of a path, ensuring it ends with '/'. */
+/**
+ * Returns a MemAlloc copy of a path, ensuring it ends with '/'.
+ */
 static char *platformDupWithSep(const char *path)
 {
     unsigned int len = TextLength(path);
@@ -118,15 +97,7 @@ char *__PHYSFS_platformCalcPrefDir(const char *org, const char *app)
     return result;
 }
 
-/* -------------------------------------------------------------------------
- * Directory operations
- * ---------------------------------------------------------------------- */
-
-PHYSFS_EnumerateCallbackResult __PHYSFS_platformEnumerate(
-    const char *dirname,
-    PHYSFS_EnumerateCallback callback,
-    const char *origdir,
-    void *callbackdata)
+PHYSFS_EnumerateCallbackResult __PHYSFS_platformEnumerate(const char *dirname, PHYSFS_EnumerateCallback callback, const char *origdir, void *callbackdata)
 {
     TraceLog(LOG_DEBUG, "PHYSFS: platformEnumerate: %s", dirname);
     FilePathList list = LoadDirectoryFiles(dirname);
@@ -138,6 +109,10 @@ PHYSFS_EnumerateCallbackResult __PHYSFS_platformEnumerate(
         if (name[0] == '.' && name[1] == '\0') continue;
         if (name[0] == '.' && name[1] == '.' && name[2] == '\0') continue;
         rc = callback(callbackdata, origdir, name);
+        /* The return value is a PHYSFS_EnumerateCallbackResult */
+        if (rc != PHYSFS_ENUM_OK) {
+            break;
+        }
     }
 
     UnloadDirectoryFiles(list);
@@ -157,7 +132,7 @@ int __PHYSFS_platformMkDir(const char *path)
 
 int __PHYSFS_platformDelete(const char *path)
 {
-    if (remove(path) != 0) {
+    if (!FileRemove(path)) {
         TraceLog(LOG_WARNING, "PHYSFS: platformDelete failed: %s", path);
         PHYSFS_setErrorCode(PHYSFS_ERR_OS_ERROR);
         return 0;
@@ -170,8 +145,6 @@ int __PHYSFS_platformStat(const char *fn, PHYSFS_Stat *stat, const int follow)
 {
     (void)follow;
 
-    /* Check directory first: raylib's FileExists uses access() which returns
-     * true for directories too, so the order here matters. */
     if (DirectoryExists(fn)) {
         TraceLog(LOG_DEBUG, "PHYSFS: platformStat directory: %s", fn);
         stat->filesize   = 0;
@@ -194,27 +167,13 @@ int __PHYSFS_platformStat(const char *fn, PHYSFS_Stat *stat, const int follow)
         return 1;
     }
 
-    TraceLog(LOG_WARNING, "PHYSFS: platformStat not found: %s", fn);
+    TraceLog(LOG_DEBUG, "PHYSFS: platformStat not found: %s", fn);
     PHYSFS_setErrorCode(PHYSFS_ERR_NOT_FOUND);
     return 0;
 }
 
-/* -------------------------------------------------------------------------
- * File I/O — fully buffered so seek / tell work on top of raylib's API
- * ---------------------------------------------------------------------- */
-
-typedef struct {
-    unsigned char  *data;      /* file contents buffer                    */
-    PHYSFS_uint64   size;      /* current logical size of the buffer      */
-    PHYSFS_uint64   pos;       /* current read/write position             */
-    char           *filename;  /* non-NULL for writable handles           */
-} PhysFSRaylibHandle;
-
 void *__PHYSFS_platformOpenRead(const char *filename)
 {
-    /* Directories can't be loaded as file data. Return an empty handle so
-     * PhysFS can proceed to archiver detection; the DIR archiver will claim
-     * it via __PHYSFS_platformStat without reading any bytes. */
     if (DirectoryExists(filename)) {
         TraceLog(LOG_DEBUG, "PHYSFS: platformOpenRead directory: %s", filename);
         PhysFSRaylibHandle *h = (PhysFSRaylibHandle *)MemAlloc(sizeof(*h));
@@ -244,7 +203,7 @@ void *__PHYSFS_platformOpenRead(const char *filename)
         return NULL;
     }
 
-    /* Copy into MemAlloc-owned memory for consistent lifetime management. */
+    /* Copy into MemAlloc memory for consistent lifetime management. */
     h->data = (unsigned char *)MemAlloc((unsigned int)bytesRead);
     if (h->data == NULL) {
         UnloadFileData(raw);
@@ -335,6 +294,10 @@ PHYSFS_sint64 __PHYSFS_platformWrite(void *opaque, const void *buf, PHYSFS_uint6
     PHYSFS_uint64 needed = h->pos + len;
 
     if (needed > h->size) {
+        if (needed > UINT_MAX) {
+            PHYSFS_setErrorCode(PHYSFS_ERR_OUT_OF_MEMORY);
+            return -1;
+        }
         unsigned char *newdata = (unsigned char *)MemRealloc(h->data, (unsigned int)needed);
         if (newdata == NULL) {
             PHYSFS_setErrorCode(PHYSFS_ERR_OUT_OF_MEMORY);
@@ -356,6 +319,10 @@ int __PHYSFS_platformSeek(void *opaque, PHYSFS_uint64 pos)
     /* Writable handles may seek past EOF; extend buffer with zeros. */
     if (pos > h->size) {
         if (h->filename != NULL) {
+            if (pos > UINT_MAX) {
+                PHYSFS_setErrorCode(PHYSFS_ERR_OUT_OF_MEMORY);
+                return 0;
+            }
             unsigned char *newdata = (unsigned char *)MemRealloc(h->data, (unsigned int)pos);
             if (newdata == NULL) {
                 PHYSFS_setErrorCode(PHYSFS_ERR_OUT_OF_MEMORY);
@@ -390,8 +357,13 @@ int __PHYSFS_platformFlush(void *opaque)
     if (h->filename == NULL) return 1;  /* read-only handle */
     if (h->data == NULL) return 1;      /* nothing written yet */
 
+    if (h->size > (PHYSFS_uint64)INT_MAX) {
+        TraceLog(LOG_ERROR, "PHYSFS: platformFlush file too large: %s", h->filename);
+        PHYSFS_setErrorCode(PHYSFS_ERR_OS_ERROR);
+        return 0;
+    }
     if (!SaveFileData(h->filename, h->data, (int)h->size)) {
-        TraceLog(LOG_WARNING, "PHYSFS: platformFlush failed: %s", h->filename);
+        TraceLog(LOG_ERROR, "PHYSFS: platformFlush failed: %s", h->filename);
         PHYSFS_setErrorCode(PHYSFS_ERR_OS_ERROR);
         return 0;
     }
@@ -404,8 +376,12 @@ void __PHYSFS_platformClose(void *opaque)
     PhysFSRaylibHandle *h = (PhysFSRaylibHandle *)opaque;
     if (h->filename != NULL) {
         TraceLog(LOG_DEBUG, "PHYSFS: platformClose: %s (%i bytes)", h->filename, (int)h->size);
-        if (h->data != NULL)
-            SaveFileData(h->filename, h->data, (int)h->size);
+        if (h->data != NULL) {
+            if (h->size > (PHYSFS_uint64)INT_MAX)
+                TraceLog(LOG_ERROR, "PHYSFS: platformClose file too large to save: %s", h->filename);
+            else if (!SaveFileData(h->filename, h->data, (int)h->size))
+                TraceLog(LOG_ERROR, "PHYSFS: platformClose failed to save: %s", h->filename);
+        }
         MemFree(h->filename);
     }
     if (h->data != NULL)

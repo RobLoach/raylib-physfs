@@ -480,8 +480,8 @@ Font LoadFontFromPhysFS(const char* fileName, int fontSize, int *fontChars, int 
  * @see UnloadShader()
  */
 Shader LoadShaderFromPhysFS(const char *vsFileName, const char *fsFileName) {
-    char* vsFile = LoadFileTextFromPhysFS(vsFileName);
-    char* fsFile = LoadFileTextFromPhysFS(fsFileName);
+    char* vsFile = vsFileName != NULL ? LoadFileTextFromPhysFS(vsFileName) : NULL;
+    char* fsFile = fsFileName != NULL ? LoadFileTextFromPhysFS(fsFileName) : NULL;
     if (vsFile == NULL && fsFile == NULL) {
         Shader output = { 0 };
         return output;
