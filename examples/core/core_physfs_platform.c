@@ -32,9 +32,6 @@ int main(void)
 
     InitWindow(screenWidth, screenHeight, "raylib [core] example - PhysFS raylib platform");
 
-    // Initialize PhysFS and mount a .zip archive.
-    // Internally, PhysFS uses raylib's LoadFileData / SaveFileData to access
-    // the filesystem rather than calling POSIX or Win32 APIs directly.
     InitPhysFS();
     MountPhysFS("resources/resources.zip", "res");
 
