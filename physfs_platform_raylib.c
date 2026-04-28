@@ -104,6 +104,7 @@ PHYSFS_EnumerateCallbackResult __PHYSFS_platformEnumerate(const char *dirname, P
     PHYSFS_EnumerateCallbackResult rc = PHYSFS_ENUM_OK;
 
     for (unsigned int i = 0; i < list.count && rc == PHYSFS_ENUM_OK; i++) {
+        if (list.paths[i] == NULL) continue;
         const char *name = GetFileName(list.paths[i]);
         if (name == NULL || name[0] == '\0') continue;
         if (name[0] == '.' && name[1] == '\0') continue;
@@ -203,16 +204,16 @@ void *__PHYSFS_platformOpenRead(const char *filename)
         return NULL;
     }
 
-    /* Copy into MemAlloc memory for consistent lifetime management. */
-    h->data = (unsigned char *)MemAlloc((unsigned int)bytesRead);
-    if (h->data == NULL) {
-        UnloadFileData(raw);
-        MemFree(h);
-        PHYSFS_setErrorCode(PHYSFS_ERR_OUT_OF_MEMORY);
-        return NULL;
+    if (bytesRead > 0) {
+        h->data = (unsigned char *)MemAlloc((unsigned int)bytesRead);
+        if (h->data == NULL) {
+            UnloadFileData(raw);
+            MemFree(h);
+            PHYSFS_setErrorCode(PHYSFS_ERR_OUT_OF_MEMORY);
+            return NULL;
+        }
+        RAYLIB_PHYSFS_MEMCPY(h->data, raw, (size_t)bytesRead);
     }
-
-    RAYLIB_PHYSFS_MEMCPY(h->data, raw, (size_t)bytesRead);
     UnloadFileData(raw);
     h->size     = (PHYSFS_uint64)bytesRead;
     h->pos      = 0;
