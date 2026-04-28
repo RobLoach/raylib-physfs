@@ -37,10 +37,14 @@ void *__PHYSFS_platformGetThreadID(void)  { return (void *)0x1; }
 int __PHYSFS_platformInit(const char *argv0)
 {
     (void)argv0;
+    TraceLog(LOG_DEBUG, "PHYSFS: platformInit");
     return 1;
 }
 
-void __PHYSFS_platformDeinit(void) { /* no-op */ }
+void __PHYSFS_platformDeinit(void)
+{
+    TraceLog(LOG_DEBUG, "PHYSFS: platformDeinit");
+}
 
 /* -------------------------------------------------------------------------
  * CD-ROM detection — not supported
@@ -77,12 +81,16 @@ static char *platformDupWithSep(const char *path)
 char *__PHYSFS_platformCalcBaseDir(const char *argv0)
 {
     (void)argv0;
-    return platformDupWithSep(GetApplicationDirectory());
+    char *result = platformDupWithSep(GetApplicationDirectory());
+    TraceLog(LOG_DEBUG, "PHYSFS: platformCalcBaseDir: %s", result ? result : "(null)");
+    return result;
 }
 
 char *__PHYSFS_platformCalcUserDir(void)
 {
-    return platformDupWithSep(GetApplicationDirectory());
+    char *result = platformDupWithSep(GetApplicationDirectory());
+    TraceLog(LOG_DEBUG, "PHYSFS: platformCalcUserDir: %s", result ? result : "(null)");
+    return result;
 }
 
 char *__PHYSFS_platformCalcPrefDir(const char *org, const char *app)
@@ -106,6 +114,7 @@ char *__PHYSFS_platformCalcPrefDir(const char *org, const char *app)
     pos += TextCopy(result + pos, app);
     result[pos++] = '/';
     result[pos]   = '\0';
+    TraceLog(LOG_DEBUG, "PHYSFS: platformCalcPrefDir: %s", result);
     return result;
 }
 
@@ -119,6 +128,7 @@ PHYSFS_EnumerateCallbackResult __PHYSFS_platformEnumerate(
     const char *origdir,
     void *callbackdata)
 {
+    TraceLog(LOG_DEBUG, "PHYSFS: platformEnumerate: %s", dirname);
     FilePathList list = LoadDirectoryFiles(dirname);
     PHYSFS_EnumerateCallbackResult rc = PHYSFS_ENUM_OK;
 
@@ -137,18 +147,22 @@ PHYSFS_EnumerateCallbackResult __PHYSFS_platformEnumerate(
 int __PHYSFS_platformMkDir(const char *path)
 {
     if (MakeDirectory(path) != 0) {
+        TraceLog(LOG_WARNING, "PHYSFS: platformMkDir failed: %s", path);
         PHYSFS_setErrorCode(PHYSFS_ERR_OS_ERROR);
         return 0;
     }
+    TraceLog(LOG_DEBUG, "PHYSFS: platformMkDir: %s", path);
     return 1;
 }
 
 int __PHYSFS_platformDelete(const char *path)
 {
     if (remove(path) != 0) {
+        TraceLog(LOG_WARNING, "PHYSFS: platformDelete failed: %s", path);
         PHYSFS_setErrorCode(PHYSFS_ERR_OS_ERROR);
         return 0;
     }
+    TraceLog(LOG_DEBUG, "PHYSFS: platformDelete: %s", path);
     return 1;
 }
 
@@ -159,6 +173,7 @@ int __PHYSFS_platformStat(const char *fn, PHYSFS_Stat *stat, const int follow)
     /* Check directory first: raylib's FileExists uses access() which returns
      * true for directories too, so the order here matters. */
     if (DirectoryExists(fn)) {
+        TraceLog(LOG_DEBUG, "PHYSFS: platformStat directory: %s", fn);
         stat->filesize   = 0;
         stat->modtime    = -1;
         stat->createtime = -1;
@@ -169,6 +184,7 @@ int __PHYSFS_platformStat(const char *fn, PHYSFS_Stat *stat, const int follow)
     }
 
     if (FileExists(fn)) {
+        TraceLog(LOG_DEBUG, "PHYSFS: platformStat file: %s", fn);
         stat->filesize   = (PHYSFS_sint64)GetFileLength(fn);
         stat->modtime    = (PHYSFS_sint64)GetFileModTime(fn);
         stat->createtime = stat->modtime;
@@ -178,6 +194,7 @@ int __PHYSFS_platformStat(const char *fn, PHYSFS_Stat *stat, const int follow)
         return 1;
     }
 
+    TraceLog(LOG_WARNING, "PHYSFS: platformStat not found: %s", fn);
     PHYSFS_setErrorCode(PHYSFS_ERR_NOT_FOUND);
     return 0;
 }
@@ -199,6 +216,7 @@ void *__PHYSFS_platformOpenRead(const char *filename)
      * PhysFS can proceed to archiver detection; the DIR archiver will claim
      * it via __PHYSFS_platformStat without reading any bytes. */
     if (DirectoryExists(filename)) {
+        TraceLog(LOG_DEBUG, "PHYSFS: platformOpenRead directory: %s", filename);
         PhysFSRaylibHandle *h = (PhysFSRaylibHandle *)MemAlloc(sizeof(*h));
         if (h == NULL) {
             PHYSFS_setErrorCode(PHYSFS_ERR_OUT_OF_MEMORY);
@@ -214,6 +232,7 @@ void *__PHYSFS_platformOpenRead(const char *filename)
     int bytesRead = 0;
     unsigned char *raw = LoadFileData(filename, &bytesRead);
     if (raw == NULL) {
+        TraceLog(LOG_WARNING, "PHYSFS: platformOpenRead failed: %s", filename);
         PHYSFS_setErrorCode(PHYSFS_ERR_NOT_FOUND);
         return NULL;
     }
@@ -239,6 +258,7 @@ void *__PHYSFS_platformOpenRead(const char *filename)
     h->size     = (PHYSFS_uint64)bytesRead;
     h->pos      = 0;
     h->filename = NULL;
+    TraceLog(LOG_DEBUG, "PHYSFS: platformOpenRead: %s (%i bytes)", filename, bytesRead);
     return h;
 }
 
@@ -283,6 +303,7 @@ static void *openWritable(const char *filename, int append)
         }
     }
 
+    TraceLog(LOG_DEBUG, "PHYSFS: platformOpen%s: %s", append ? "Append" : "Write", filename);
     return h;
 }
 
@@ -370,9 +391,11 @@ int __PHYSFS_platformFlush(void *opaque)
     if (h->data == NULL) return 1;      /* nothing written yet */
 
     if (!SaveFileData(h->filename, h->data, (int)h->size)) {
+        TraceLog(LOG_WARNING, "PHYSFS: platformFlush failed: %s", h->filename);
         PHYSFS_setErrorCode(PHYSFS_ERR_OS_ERROR);
         return 0;
     }
+    TraceLog(LOG_DEBUG, "PHYSFS: platformFlush: %s (%i bytes)", h->filename, (int)h->size);
     return 1;
 }
 
@@ -380,6 +403,7 @@ void __PHYSFS_platformClose(void *opaque)
 {
     PhysFSRaylibHandle *h = (PhysFSRaylibHandle *)opaque;
     if (h->filename != NULL) {
+        TraceLog(LOG_DEBUG, "PHYSFS: platformClose: %s (%i bytes)", h->filename, (int)h->size);
         if (h->data != NULL)
             SaveFileData(h->filename, h->data, (int)h->size);
         MemFree(h->filename);
