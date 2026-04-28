@@ -10,9 +10,6 @@
 *   This is useful on platforms where raylib provides a custom file I/O layer,
 *   such as web or embedded targets.
 *
-*   This example has been created using raylib-physfs 6.0.0 (https://github.com/RobLoach/raylib-physfs)
-*   raylib-physfs is licensed under an unmodified zlib/libpng license (View raylib-physfs.h for details)
-*
 *   Copyright (c) 2026 Rob Loach (@RobLoach)
 *
 ********************************************************************************************/
