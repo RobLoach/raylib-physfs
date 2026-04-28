@@ -14,6 +14,7 @@ Load [raylib](https://www.raylib.com/) images, sounds, music, fonts and shaders 
 - Save files through PhysFS
 - Set all file loading to use PhysFS via `SetPhysFSCallbacks()`
 - Find the user's configuration directory with `GetPrefDirectory()`
+- Use raylib as the PhysFS platform layer via [`physfs_platform_raylib.c`](physfs_platform_raylib.c)
 
 ## Usage
 
@@ -75,6 +76,26 @@ Shader LoadShaderFromPhysFS(const char* vsFileName, const char* fsFileName);  //
 void SetPhysFSCallbacks();                                      // Set the raylib file loader/saver callbacks to use PhysFS
 const char* GetPrefDirectory(const char *organization, const char *application); // Get the user's current config directory for the application.
 ```
+
+### Raylib Platform
+
+[`physfs_platform_raylib.c`](physfs_platform_raylib.c) implements the PhysFS platform abstraction layer using raylib's own file API (`LoadFileData`, `SaveFileData`, `LoadDirectoryFiles`, `MakeDirectory`, etc.), similar to [`physfs_platform_unix.c`](https://github.com/icculus/physfs/blob/main/src/physfs_platform_unix.c) in the PhysFS source. This is useful on platforms where raylib provides a custom file I/O layer.
+
+Enable it with the `RAYLIB_PHYSFS_PLATFORM_RAYLIB` CMake option:
+
+``` bash
+cmake -B build -DRAYLIB_PHYSFS_PLATFORM_RAYLIB=ON
+```
+
+Or define `PHYSFS_PLATFORM_RAYLIB` before including the implementation:
+
+``` c
+#define PHYSFS_PLATFORM_RAYLIB
+#define RAYLIB_PHYSFS_IMPLEMENTATION
+#include "raylib-physfs.h"
+```
+
+> **Note:** `PHYSFS_PLATFORM_RAYLIB` and `SetPhysFSCallbacks()` are mutually exclusive. `SetPhysFSCallbacks()` routes `LoadFileData` through PhysFS; the raylib platform routes PhysFS through `LoadFileData` — combining them creates a circular dependency.
 
 ### Defines
 

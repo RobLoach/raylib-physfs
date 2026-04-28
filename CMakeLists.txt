@@ -26,8 +26,8 @@ if (RAYLIB_PHYSFS_PLATFORM_RAYLIB)
     target_compile_definitions(raylib_physfs INTERFACE PHYSFS_PLATFORM_RAYLIB)
 endif()
 
-# Set the header files as install files.
-install(FILES raylib-physfs.h
+# Install the header and the raylib platform implementation together.
+install(FILES raylib-physfs.h physfs_platform_raylib.c
     DESTINATION include
 )
 
