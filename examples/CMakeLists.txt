@@ -18,10 +18,6 @@ add_executable(audio_sound_loading)
 target_sources(audio_sound_loading PRIVATE "${CMAKE_CURRENT_LIST_DIR}/audio/audio_sound_loading.c")
 target_link_libraries(audio_sound_loading PRIVATE raylib physfs-static raylib_physfs)
 
-add_executable(core_physfs_platform)
-target_sources(core_physfs_platform PRIVATE "${CMAKE_CURRENT_LIST_DIR}/core/core_physfs_platform.c")
-target_link_libraries(core_physfs_platform PRIVATE raylib physfs-static raylib_physfs)
-
 add_executable(shaders_texture_waves)
 target_sources(shaders_texture_waves PRIVATE "${CMAKE_CURRENT_LIST_DIR}/shaders/shaders_texture_waves.c")
 target_link_libraries(shaders_texture_waves PRIVATE raylib physfs-static raylib_physfs)
