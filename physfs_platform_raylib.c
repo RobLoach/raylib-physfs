@@ -12,17 +12,17 @@
 #include <string.h>  /* memset */
 
 typedef struct {
-    unsigned char  *data;      /* file contents buffer                    */
-    PHYSFS_uint64   size;      /* current logical size of the buffer      */
-    PHYSFS_uint64   pos;       /* current read/write position             */
-    char           *filename;  /* non-NULL for writable handles           */
+    unsigned char  *data; /* file contents */
+    PHYSFS_uint64   size; /* current logical size of the buffer */
+    PHYSFS_uint64   pos; /* current read/write position */
+    char           *filename; /* non-NULL for writable handles */
 } PhysFSRaylibHandle;
 
-void *__PHYSFS_platformCreateMutex(void)  { return (void *)0x1; }
-void  __PHYSFS_platformDestroyMutex(void *mutex) { (void)mutex; }
-int   __PHYSFS_platformGrabMutex(void *mutex)    { (void)mutex; return 1; }
-void  __PHYSFS_platformReleaseMutex(void *mutex) { (void)mutex; }
-void *__PHYSFS_platformGetThreadID(void)  { return (void *)0x1; }
+void* __PHYSFS_platformCreateMutex(void) { return (void *)0x1; }
+void __PHYSFS_platformDestroyMutex(void *mutex) { (void)mutex; }
+int __PHYSFS_platformGrabMutex(void *mutex) { (void)mutex; return 1; }
+void __PHYSFS_platformReleaseMutex(void *mutex) { (void)mutex; }
+void* __PHYSFS_platformGetThreadID(void) { return (void *)0x1; }
 void __PHYSFS_platformDetectAvailableCDs(PHYSFS_StringCallback cb, void *data) { (void)cb; (void)data; }
 
 int __PHYSFS_platformInit(const char *argv0)
@@ -57,6 +57,9 @@ static char *platformDupWithSep(const char *path)
     return result;
 }
 
+/**
+ * Gets the application directory.
+ */
 char *__PHYSFS_platformCalcBaseDir(const char *argv0)
 {
     (void)argv0;
@@ -65,6 +68,11 @@ char *__PHYSFS_platformCalcBaseDir(const char *argv0)
     return result;
 }
 
+/**
+ * Gets the application directory.
+ *
+ * TODO: Add a HOME Directory function to raylib?
+ */
 char *__PHYSFS_platformCalcUserDir(void)
 {
     char *result = platformDupWithSep(GetApplicationDirectory());
@@ -72,6 +80,11 @@ char *__PHYSFS_platformCalcUserDir(void)
     return result;
 }
 
+/**
+ * Gets a subdirectory from the application directory.
+ *
+ * TODO: Add a user pref directory to raylib?
+ */
 char *__PHYSFS_platformCalcPrefDir(const char *org, const char *app)
 {
     const char *base     = GetApplicationDirectory();
@@ -317,7 +330,7 @@ int __PHYSFS_platformSeek(void *opaque, PHYSFS_uint64 pos)
 {
     PhysFSRaylibHandle *h = (PhysFSRaylibHandle *)opaque;
 
-    /* Writable handles may seek past EOF; extend buffer with zeros. */
+    /* Expand the buffer if it goes beyond the memory size. */
     if (pos > h->size) {
         if (h->filename != NULL) {
             if (pos > UINT_MAX) {
