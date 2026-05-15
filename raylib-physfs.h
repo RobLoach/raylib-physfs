@@ -59,6 +59,7 @@ RAYLIB_PHYSFS_DEF FilePathList LoadDirectoryFilesFromPhysFS(const char* dirPath)
 RAYLIB_PHYSFS_DEF FilePathList LoadDirectoryFilesFromPhysFSEx(const char *basePath, const char *filter, bool scanSubdirs); // Get directory filepaths with filtering and optional recursive scan (memory should be freed)
 RAYLIB_PHYSFS_DEF long GetFileModTimeFromPhysFS(const char* fileName);            // Get file modification time (last write time) from PhysFS
 RAYLIB_PHYSFS_DEF Image LoadImageFromPhysFS(const char* fileName);                // Load an image from PhysFS
+RAYLIB_PHYSFS_DEF Image LoadImageAnimFromPhysFS(const char* fileName, int* frames); // Load an animated image from PhysFS (e.g. GIF)
 RAYLIB_PHYSFS_DEF Texture2D LoadTextureFromPhysFS(const char* fileName);          // Load a texture from PhysFS
 RAYLIB_PHYSFS_DEF Wave LoadWaveFromPhysFS(const char* fileName);                  // Load wave data from PhysFS
 RAYLIB_PHYSFS_DEF Music LoadMusicStreamFromPhysFS(const char* fileName);          // Load music data from PhysFS
@@ -341,6 +342,30 @@ Image LoadImageFromPhysFS(const char* fileName) {
     // Load from the memory.
     const char* extension = GetFileExtension(fileName);
     Image image = LoadImageFromMemory(extension, fileData, bytesRead);
+    UnloadFileData(fileData);
+    return image;
+}
+
+/**
+ * Load an animated image from PhysFS (e.g. GIF).
+ *
+ * @param fileName The filename to load from the search paths.
+ * @param frames Set to the number of frames decoded on success.
+ *
+ * @return The loaded image on success (height = frames * frameHeight). An empty image otherwise.
+ *
+ * @see LoadImageFromPhysFS()
+ */
+Image LoadImageAnimFromPhysFS(const char* fileName, int* frames) {
+    int bytesRead;
+    unsigned char* fileData = LoadFileDataFromPhysFS(fileName, &bytesRead);
+    if (bytesRead == 0) {
+        Image output = { 0 };
+        return output;
+    }
+
+    const char* extension = GetFileExtension(fileName);
+    Image image = LoadImageAnimFromMemory(extension, fileData, bytesRead, frames);
     UnloadFileData(fileData);
     return image;
 }
