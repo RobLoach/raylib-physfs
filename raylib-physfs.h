@@ -37,6 +37,15 @@
 #define RAYLIB_PHYSFS_DEF
 #endif
 
+// raylib 6.1+ made the SaveFileDataCallback data pointer const-qualified.
+#ifndef RAYLIB_PHYSFS_SAVE_DATA_CONST
+    #if defined(RAYLIB_VERSION_MAJOR) && ((RAYLIB_VERSION_MAJOR > 6) || (RAYLIB_VERSION_MAJOR == 6 && RAYLIB_VERSION_MINOR >= 1))
+        #define RAYLIB_PHYSFS_SAVE_DATA_CONST const
+    #else
+        #define RAYLIB_PHYSFS_SAVE_DATA_CONST
+    #endif
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -53,7 +62,7 @@ RAYLIB_PHYSFS_DEF bool DirectoryExistsInPhysFS(const char* dirPath);            
 RAYLIB_PHYSFS_DEF unsigned char* LoadFileDataFromPhysFS(const char* fileName, int* bytesRead);  // Load a data buffer from PhysFS (memory should be freed)
 RAYLIB_PHYSFS_DEF char* LoadFileTextFromPhysFS(const char* fileName);             // Load text from a file (memory should be freed)
 RAYLIB_PHYSFS_DEF bool SetPhysFSWriteDirectory(const char* newDir);               // Set the base directory where PhysFS should write files to (defaults to the current working directory)
-RAYLIB_PHYSFS_DEF bool SaveFileDataToPhysFS(const char* fileName, void* data, int bytesToWrite);  // Save the given file data in PhysFS
+RAYLIB_PHYSFS_DEF bool SaveFileDataToPhysFS(const char* fileName, RAYLIB_PHYSFS_SAVE_DATA_CONST void* data, int bytesToWrite);  // Save the given file data in PhysFS
 RAYLIB_PHYSFS_DEF bool SaveFileTextToPhysFS(const char* fileName, const char* text);    // Save the given file text in PhysFS
 RAYLIB_PHYSFS_DEF FilePathList LoadDirectoryFilesFromPhysFS(const char* dirPath);  // Get filenames in a directory path (memory should be freed)
 RAYLIB_PHYSFS_DEF FilePathList LoadDirectoryFilesFromPhysFSEx(const char *basePath, const char *filter, bool scanSubdirs); // Get directory filepaths with filtering and optional recursive scan (memory should be freed)
@@ -546,7 +555,7 @@ bool SetPhysFSWriteDirectory(const char* newDir) {
  *
  * @return True on success, false on failure.
  */
-bool SaveFileDataToPhysFS(const char* fileName, void* data, int bytesToWrite) {
+bool SaveFileDataToPhysFS(const char* fileName, RAYLIB_PHYSFS_SAVE_DATA_CONST void* data, int bytesToWrite) {
     // Protect against empty writes.
     if (bytesToWrite == 0) {
         return true;
@@ -579,7 +588,7 @@ bool SaveFileDataToPhysFS(const char* fileName, void* data, int bytesToWrite) {
  * @return True on success, false on failure.
  */
 bool SaveFileTextToPhysFS(const char* fileName, const char* text) {
-    return SaveFileDataToPhysFS(fileName, (void*)text, TextLength(text) + 1); // +1 for the Null Terminator
+    return SaveFileDataToPhysFS(fileName, (RAYLIB_PHYSFS_SAVE_DATA_CONST void*)text, TextLength(text) + 1); // +1 for the Null Terminator
 }
 
 static bool LoadDirectoryFilesFromPhysFSAppend(FilePathList *files, unsigned int *capacity, const char *path) {
