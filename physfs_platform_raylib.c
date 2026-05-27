@@ -206,7 +206,7 @@ void *__PHYSFS_platformOpenRead(const char *filename)
     unsigned char *raw = LoadFileData(filename, &bytesRead);
     if (raw == NULL) {
         TraceLog(LOG_WARNING, "PHYSFS: platformOpenRead failed: %s", filename);
-        PHYSFS_setErrorCode(PHYSFS_ERR_NOT_FOUND);
+        PHYSFS_setErrorCode(FileExists(filename) ? PHYSFS_ERR_IO : PHYSFS_ERR_NOT_FOUND);
         return NULL;
     }
 
