@@ -6,6 +6,18 @@
  *   #define PHYSFS_PLATFORM_RAYLIB
  *   #define RAYLIB_PHYSFS_IMPLEMENTATION
  *   #include "raylib-physfs.h"
+ *
+ * Known limitations
+ * -----------------
+ * - ~2 GB file size cap: raylib uses int for byte counts, so files larger
+ *   than INT_MAX cannot be read, written, or stat'd accurately.
+ * - Not thread-safe: all mutex hooks are no-ops; calls must come from a
+ *   single thread.
+ * - No real user/pref directory: falls back to the application directory
+ *   because raylib doesn't expose HOME/%APPDATA% equivalents.
+ * - No directory deletion: raylib has no API to remove directories.
+ * - Whole-file buffering: writable handles buffer the entire file in memory
+ *   until flush/close; not suitable for very large outputs.
  */
 
 #include <limits.h>  /* UINT_MAX */
