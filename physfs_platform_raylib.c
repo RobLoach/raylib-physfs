@@ -188,20 +188,6 @@ int __PHYSFS_platformStat(const char *fn, PHYSFS_Stat *stat, const int follow)
 
 void *__PHYSFS_platformOpenRead(const char *filename)
 {
-    if (DirectoryExists(filename)) {
-        TraceLog(LOG_DEBUG, "PHYSFS: platformOpenRead directory: %s", filename);
-        PhysFSRaylibHandle *h = (PhysFSRaylibHandle *)MemAlloc(sizeof(*h));
-        if (h == NULL) {
-            PHYSFS_setErrorCode(PHYSFS_ERR_OUT_OF_MEMORY);
-            return NULL;
-        }
-        h->data     = NULL;
-        h->size     = 0;
-        h->pos      = 0;
-        h->filename = NULL;
-        return h;
-    }
-
     int bytesRead = 0;
     unsigned char *raw = LoadFileData(filename, &bytesRead);
     if (raw == NULL) {
