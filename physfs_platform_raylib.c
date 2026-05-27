@@ -146,6 +146,11 @@ int __PHYSFS_platformMkDir(const char *path)
 
 int __PHYSFS_platformDelete(const char *path)
 {
+    if (DirectoryExists(path)) {
+        TraceLog(LOG_WARNING, "PHYSFS: platformDelete does not support directories: %s", path);
+        PHYSFS_setErrorCode(PHYSFS_ERR_UNSUPPORTED);
+        return 0;
+    }
     if (!FileRemove(path)) {
         TraceLog(LOG_WARNING, "PHYSFS: platformDelete failed: %s", path);
         PHYSFS_setErrorCode(PHYSFS_ERR_OS_ERROR);
