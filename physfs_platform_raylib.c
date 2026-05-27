@@ -174,7 +174,7 @@ int __PHYSFS_platformStat(const char *fn, PHYSFS_Stat *stat, const int follow)
         TraceLog(LOG_DEBUG, "PHYSFS: platformStat file: %s", fn);
         stat->filesize   = (PHYSFS_sint64)GetFileLength(fn);
         stat->modtime    = (PHYSFS_sint64)GetFileModTime(fn);
-        stat->createtime = stat->modtime;
+        stat->createtime = -1;
         stat->accesstime = -1;
         stat->filetype   = PHYSFS_FILETYPE_REGULAR;
         stat->readonly   = 0;
