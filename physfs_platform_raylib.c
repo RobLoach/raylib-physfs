@@ -24,9 +24,10 @@
 #include <string.h>  /* memset */
 
 typedef struct {
-    unsigned char  *data; /* file contents */
-    PHYSFS_uint64   size; /* current logical size of the buffer */
-    PHYSFS_uint64   pos; /* current read/write position */
+    unsigned char  *data;     /* file contents */
+    PHYSFS_uint64   size;     /* current logical size of the buffer */
+    PHYSFS_uint64   capacity; /* allocated bytes (>= size) */
+    PHYSFS_uint64   pos;      /* current read/write position */
     char           *filename; /* non-NULL for writable handles */
 } PhysFSRaylibHandle;
 
@@ -222,6 +223,7 @@ void *__PHYSFS_platformOpenRead(const char *filename)
 
     h->data     = raw;
     h->size     = (PHYSFS_uint64)bytesRead;
+    h->capacity = (PHYSFS_uint64)bytesRead;
     h->pos      = 0;
     h->filename = NULL;
     TraceLog(LOG_DEBUG, "PHYSFS: platformOpenRead: %s (%i bytes)", filename, bytesRead);
@@ -244,9 +246,10 @@ static void *openWritable(const char *filename, int append)
     }
     TextCopy(h->filename, filename);
 
-    h->data = NULL;
-    h->size = 0;
-    h->pos  = 0;
+    h->data     = NULL;
+    h->size     = 0;
+    h->capacity = 0;
+    h->pos      = 0;
 
     if (append && FileExists(filename)) {
         int bytesRead = 0;
@@ -268,10 +271,13 @@ static void *openWritable(const char *filename, int append)
                 return NULL;
             }
             RAYLIB_PHYSFS_MEMCPY(h->data, raw, (size_t)bytesRead);
-            h->size = (PHYSFS_uint64)bytesRead;
-            h->pos  = h->size;
+            UnloadFileData(raw);
+            h->size     = (PHYSFS_uint64)bytesRead;
+            h->capacity = (PHYSFS_uint64)bytesRead;
+            h->pos      = h->size;
+        } else if (raw != NULL) {
+            UnloadFileData(raw);
         }
-        UnloadFileData(raw);
     }
 
     TraceLog(LOG_DEBUG, "PHYSFS: platformOpen%s: %s", append ? "Append" : "Write", filename);
@@ -305,22 +311,26 @@ PHYSFS_sint64 __PHYSFS_platformWrite(void *opaque, const void *buf, PHYSFS_uint6
     PhysFSRaylibHandle *h = (PhysFSRaylibHandle *)opaque;
     PHYSFS_uint64 needed = h->pos + len;
 
-    if (needed > h->size) {
+    if (needed > h->capacity) {
         if (needed > UINT_MAX) {
             PHYSFS_setErrorCode(PHYSFS_ERR_OUT_OF_MEMORY);
             return -1;
         }
-        unsigned char *newdata = (unsigned char *)MemRealloc(h->data, (unsigned int)needed);
+        PHYSFS_uint64 newcap = h->capacity * 2;
+        if (newcap < needed) newcap = needed;
+        if (newcap > UINT_MAX) newcap = UINT_MAX;
+        unsigned char *newdata = (unsigned char *)MemRealloc(h->data, (unsigned int)newcap);
         if (newdata == NULL) {
             PHYSFS_setErrorCode(PHYSFS_ERR_OUT_OF_MEMORY);
             return -1;
         }
-        h->data = newdata;
-        h->size = needed;
+        h->data     = newdata;
+        h->capacity = newcap;
     }
 
     RAYLIB_PHYSFS_MEMCPY(h->data + h->pos, buf, (size_t)len);
     h->pos += len;
+    if (h->pos > h->size) h->size = h->pos;
     return (PHYSFS_sint64)len;
 }
 
