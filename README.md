@@ -95,16 +95,6 @@ Or define `PHYSFS_PLATFORM_RAYLIB` before including the implementation:
 #include "raylib-physfs.h"
 ```
 
-#### Platform integration limitations
-
-When using `PHYSFS_PLATFORM_RAYLIB`, be aware of the following trade-offs:
-
-- **~2 GB file size cap.** `SaveFileData`/`LoadFileData`/`GetFileLength` use `int` for byte counts. Files larger than `INT_MAX` cannot be read, written, or stat'd accurately.
-- **Not thread-safe.** All mutex hooks are no-ops. PhysFS calls into this platform must come from a single thread.
-- **No real user or preference directory.** `__PHYSFS_platformCalcUserDir` and `__PHYSFS_platformCalcPrefDir` fall back to the application directory because raylib doesn't expose `HOME`/`%APPDATA%` equivalents.
-- **No directory deletion.** `__PHYSFS_platformDelete` cannot remove directories; raylib has no API for it.
-- **Whole-file buffering.** Writable handles buffer the entire file in memory until flush/close — not suitable for very large outputs.
-
 ### Defines
 
 Have a look at [Cmake config](CMakeLists.txt) to see how to define different things that change the behavior of physfs, raylib, and raylib-physfs.
