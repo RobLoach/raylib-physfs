@@ -20,15 +20,16 @@
  *   until flush/close; not suitable for very large outputs.
  */
 
-#include <limits.h>  /* UINT_MAX */
-#include <string.h>  /* memset */
+#include <limits.h>   /* UINT_MAX */
+#include <stdbool.h>  /* bool */
+#include <string.h>   /* memset */
 
 typedef struct {
     unsigned char  *data;     /* file contents */
     PHYSFS_uint64   size;     /* current logical size of the buffer */
     PHYSFS_uint64   pos;      /* current read/write position */
     char           *filename; /* non-NULL for writable handles */
-    int             dirty;    /* 1 if buffer needs to be saved */
+    bool            dirty;    /* true if buffer needs to be saved */
 } PhysFSRaylibHandle;
 
 void* __PHYSFS_platformCreateMutex(void) { return (void *)0x1; }
@@ -240,7 +241,7 @@ void *__PHYSFS_platformOpenRead(const char *filename)
     h->size     = (PHYSFS_uint64)bytesRead;
     h->pos      = 0;
     h->filename = NULL;
-    h->dirty    = 0;
+    h->dirty    = false;
     TraceLog(LOG_DEBUG, "PHYSFS: platformOpenRead: %s (%i bytes)", filename, bytesRead);
     return h;
 }
@@ -264,7 +265,7 @@ static void *openWritable(const char *filename, int append)
     h->data  = NULL;
     h->size  = 0;
     h->pos   = 0;
-    h->dirty = 0;
+    h->dirty = false;
 
     if (append && FileExists(filename)) {
         int bytesRead = 0;
@@ -339,7 +340,7 @@ PHYSFS_sint64 __PHYSFS_platformWrite(void *opaque, const void *buf, PHYSFS_uint6
 
     RAYLIB_PHYSFS_MEMCPY(h->data + h->pos, buf, (size_t)len);
     h->pos  += len;
-    h->dirty = 1;
+    h->dirty = true;
     return (PHYSFS_sint64)len;
 }
 
@@ -362,7 +363,7 @@ int __PHYSFS_platformSeek(void *opaque, PHYSFS_uint64 pos)
             memset(newdata + h->size, 0, (size_t)(pos - h->size));
             h->data  = newdata;
             h->size  = pos;
-            h->dirty = 1;
+            h->dirty = true;
         } else {
             PHYSFS_setErrorCode(PHYSFS_ERR_PAST_EOF);
             return 0;
@@ -398,7 +399,7 @@ int __PHYSFS_platformFlush(void *opaque)
         PHYSFS_setErrorCode(PHYSFS_ERR_OS_ERROR);
         return 0;
     }
-    h->dirty = 0;
+    h->dirty = false;
     TraceLog(LOG_DEBUG, "PHYSFS: platformFlush: %s (%i bytes)", h->filename, (int)h->size);
     return 1;
 }
