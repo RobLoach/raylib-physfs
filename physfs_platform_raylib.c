@@ -217,17 +217,7 @@ void *__PHYSFS_platformOpenRead(const char *filename)
         return NULL;
     }
 
-    if (bytesRead > 0) {
-        h->data = (unsigned char *)MemAlloc((unsigned int)bytesRead);
-        if (h->data == NULL) {
-            UnloadFileData(raw);
-            MemFree(h);
-            PHYSFS_setErrorCode(PHYSFS_ERR_OUT_OF_MEMORY);
-            return NULL;
-        }
-        RAYLIB_PHYSFS_MEMCPY(h->data, raw, (size_t)bytesRead);
-    }
-    UnloadFileData(raw);
+    h->data     = raw; /* take ownership; freed by MemFree in platformClose */
     h->size     = (PHYSFS_uint64)bytesRead;
     h->pos      = 0;
     h->filename = NULL;
