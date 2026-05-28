@@ -217,7 +217,7 @@ void *__PHYSFS_platformOpenRead(const char *filename)
         return NULL;
     }
 
-    h->data     = raw; /* take ownership; freed by MemFree in platformClose */
+    h->data     = raw;
     h->size     = (PHYSFS_uint64)bytesRead;
     h->pos      = 0;
     h->filename = NULL;
