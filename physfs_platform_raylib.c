@@ -258,7 +258,14 @@ static void *openWritable(const char *filename, int append)
     if (append && FileExists(filename)) {
         int bytesRead = 0;
         unsigned char *raw = LoadFileData(filename, &bytesRead);
-        if (raw != NULL && bytesRead > 0) {
+        if (raw == NULL) {
+            TraceLog(LOG_WARNING, "PHYSFS: openAppend failed to read existing file: %s", filename);
+            MemFree(h->filename);
+            MemFree(h);
+            PHYSFS_setErrorCode(PHYSFS_ERR_IO);
+            return NULL;
+        }
+        if (bytesRead > 0) {
             h->data = (unsigned char *)MemAlloc((unsigned int)bytesRead);
             if (h->data == NULL) {
                 UnloadFileData(raw);
@@ -268,12 +275,10 @@ static void *openWritable(const char *filename, int append)
                 return NULL;
             }
             RAYLIB_PHYSFS_MEMCPY(h->data, raw, (size_t)bytesRead);
-            UnloadFileData(raw);
             h->size = (PHYSFS_uint64)bytesRead;
             h->pos  = h->size;
-        } else if (raw != NULL) {
-            UnloadFileData(raw);
         }
+        UnloadFileData(raw);
     }
 
     TraceLog(LOG_DEBUG, "PHYSFS: platformOpen%s: %s", append ? "Append" : "Write", filename);
