@@ -20,14 +20,16 @@
  *   until flush/close; not suitable for very large outputs.
  */
 
-#include <limits.h>  /* UINT_MAX */
-#include <string.h>  /* memset */
+#include <limits.h>   /* UINT_MAX */
+#include <stdbool.h>  /* bool */
+#include <string.h>   /* memset */
 
 typedef struct {
-    unsigned char  *data; /* file contents */
-    PHYSFS_uint64   size; /* current logical size of the buffer */
-    PHYSFS_uint64   pos; /* current read/write position */
+    unsigned char  *data;     /* file contents */
+    PHYSFS_uint64   size;     /* current logical size of the buffer */
+    PHYSFS_uint64   pos;      /* current read/write position */
     char           *filename; /* non-NULL for writable handles */
+    bool            dirty;    /* true if buffer needs to be saved */
 } PhysFSRaylibHandle;
 
 void* __PHYSFS_platformCreateMutex(void) { return (void *)0x1; }
@@ -205,6 +207,21 @@ int __PHYSFS_platformStat(const char *fn, PHYSFS_Stat *stat, const int follow)
 
 void *__PHYSFS_platformOpenRead(const char *filename)
 {
+    if (DirectoryExists(filename)) {
+        TraceLog(LOG_DEBUG, "PHYSFS: platformOpenRead directory: %s", filename);
+        PhysFSRaylibHandle *h = (PhysFSRaylibHandle *)MemAlloc(sizeof(*h));
+        if (h == NULL) {
+            PHYSFS_setErrorCode(PHYSFS_ERR_OUT_OF_MEMORY);
+            return NULL;
+        }
+        h->data     = NULL;
+        h->size     = 0;
+        h->pos      = 0;
+        h->filename = NULL;
+        h->dirty    = 0;
+        return h;
+    }
+
     int bytesRead = 0;
     unsigned char *raw = LoadFileData(filename, &bytesRead);
     if (raw == NULL) {
@@ -224,6 +241,7 @@ void *__PHYSFS_platformOpenRead(const char *filename)
     h->size     = (PHYSFS_uint64)bytesRead;
     h->pos      = 0;
     h->filename = NULL;
+    h->dirty    = false;
     TraceLog(LOG_DEBUG, "PHYSFS: platformOpenRead: %s (%i bytes)", filename, bytesRead);
     return h;
 }
@@ -244,9 +262,10 @@ static void *openWritable(const char *filename, int append)
     }
     TextCopy(h->filename, filename);
 
-    h->data = NULL;
-    h->size = 0;
-    h->pos  = 0;
+    h->data  = NULL;
+    h->size  = 0;
+    h->pos   = 0;
+    h->dirty = false;
 
     if (append && FileExists(filename)) {
         int bytesRead = 0;
@@ -320,7 +339,8 @@ PHYSFS_sint64 __PHYSFS_platformWrite(void *opaque, const void *buf, PHYSFS_uint6
     }
 
     RAYLIB_PHYSFS_MEMCPY(h->data + h->pos, buf, (size_t)len);
-    h->pos += len;
+    h->pos  += len;
+    h->dirty = true;
     return (PHYSFS_sint64)len;
 }
 
@@ -341,8 +361,9 @@ int __PHYSFS_platformSeek(void *opaque, PHYSFS_uint64 pos)
                 return 0;
             }
             memset(newdata + h->size, 0, (size_t)(pos - h->size));
-            h->data = newdata;
-            h->size = pos;
+            h->data  = newdata;
+            h->size  = pos;
+            h->dirty = true;
         } else {
             PHYSFS_setErrorCode(PHYSFS_ERR_PAST_EOF);
             return 0;
@@ -366,8 +387,7 @@ PHYSFS_sint64 __PHYSFS_platformFileLength(void *opaque)
 int __PHYSFS_platformFlush(void *opaque)
 {
     PhysFSRaylibHandle *h = (PhysFSRaylibHandle *)opaque;
-    if (h->filename == NULL) return 1;  /* read-only handle */
-    if (h->data == NULL) return 1;      /* nothing written yet */
+    if (h->filename == NULL || !h->dirty) return 1;
 
     if (h->size > (PHYSFS_uint64)INT_MAX) {
         TraceLog(LOG_ERROR, "PHYSFS: platformFlush file too large: %s", h->filename);
@@ -379,6 +399,7 @@ int __PHYSFS_platformFlush(void *opaque)
         PHYSFS_setErrorCode(PHYSFS_ERR_OS_ERROR);
         return 0;
     }
+    h->dirty = false;
     TraceLog(LOG_DEBUG, "PHYSFS: platformFlush: %s (%i bytes)", h->filename, (int)h->size);
     return 1;
 }
@@ -388,7 +409,7 @@ void __PHYSFS_platformClose(void *opaque)
     PhysFSRaylibHandle *h = (PhysFSRaylibHandle *)opaque;
     if (h->filename != NULL) {
         TraceLog(LOG_DEBUG, "PHYSFS: platformClose: %s (%i bytes)", h->filename, (int)h->size);
-        if (h->data != NULL) {
+        if (h->dirty && h->data != NULL) {
             if (h->size > (PHYSFS_uint64)INT_MAX)
                 TraceLog(LOG_ERROR, "PHYSFS: platformClose file too large to save: %s", h->filename);
             else if (!SaveFileData(h->filename, h->data, (int)h->size))
