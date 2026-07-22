@@ -28,11 +28,8 @@ int main(void)
     // Init PhysFS with the given mount point.
     InitPhysFSEx("resources", "res");
 
-    Wave wav = LoadWaveFromPhysFS("res/sound.wav");
-    Wave ogg = LoadWaveFromPhysFS("res/target.ogg");
-
-    Sound fxWav = LoadSoundFromWave(wav);         // Load WAV audio file
-    Sound fxOgg = LoadSoundFromWave(ogg);        // Load OGG audio file
+    Sound fxWav = LoadSoundFromPhysFS("res/sound.wav");     // Load WAV audio file
+    Sound fxOgg = LoadSoundFromPhysFS("res/target.ogg");    // Load OGG audio file
 
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
@@ -61,8 +58,6 @@ int main(void)
 
     // De-Initialization
     //--------------------------------------------------------------------------------------
-    UnloadWave(wav);
-    UnloadWave(ogg);
     UnloadSound(fxWav);     // Unload sound data
     UnloadSound(fxOgg);     // Unload sound data
 

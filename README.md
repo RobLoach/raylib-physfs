@@ -70,6 +70,7 @@ long GetFileModTimeFromPhysFS(const char* fileName);            // Get file modi
 Image LoadImageFromPhysFS(const char* fileName);                // Load an image from PhysFS
 Texture2D LoadTextureFromPhysFS(const char* fileName);          // Load a texture from PhysFS
 Wave LoadWaveFromPhysFS(const char* fileName);                  // Load wave data from PhysFS
+Sound LoadSoundFromPhysFS(const char* fileName);                // Load a sound from PhysFS
 Music LoadMusicStreamFromPhysFS(const char* fileName);          // Load music data from PhysFS
 Font LoadFontFromPhysFS(const char* fileName, int fontSize, int *fontChars, int charsCount);  // Load a font from PhysFS
 Shader LoadShaderFromPhysFS(const char* vsFileName, const char* fsFileName);  // Load shader from PhysFS
