@@ -181,12 +181,22 @@ int main(int argc, char *argv[]) {
     Assert(UnmountPhysFS("resources"));
     AssertNot(UnmountPhysFS("MissingDirectory"));
 
-    // SetPhysFSCallbacks()
-    SetPhysFSCallbacks();
-
     // GetPrefDirectory
     const char* perfDir = GetPrefDirectory("RobLoach", "raylib-physfs-test");
     AssertNotEqual(perfDir, 0);
+    Assert(DirectoryExists(perfDir), "GetPrefDirectory() should create the directory on disk");
+
+    // Write into the pref directory
+    {
+        Assert(SetPhysFSWriteDirectory(perfDir));
+        Assert(SaveFileTextToPhysFS("pref-test.txt", "Pref file"));
+        char* prefText = LoadFileText(TextFormat("%spref-test.txt", perfDir));
+        Assert(TextIsEqual(prefText, "Pref file"));
+        UnloadFileText(prefText);
+    }
+
+    // SetPhysFSCallbacks()
+    SetPhysFSCallbacks();
 
     // ClosePhysFS()
     Assert(ClosePhysFS());

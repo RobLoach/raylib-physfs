@@ -95,7 +95,8 @@ char *__PHYSFS_platformCalcUserDir(void)
 }
 
 /**
- * Gets a subdirectory from the application directory.
+ * Gets a subdirectory from the application directory, creating the
+ * org/app directories on disk if they don't already exist.
  *
  * TODO: Add a user pref directory to raylib?
  */
@@ -120,6 +121,16 @@ char *__PHYSFS_platformCalcPrefDir(const char *org, const char *app)
     pos += TextCopy(result + pos, app);
     result[pos++] = '/';
     result[pos]   = '\0';
+
+    /* Create the org/app directories on disk. MakeDirectory() creates any
+     * missing intermediate directories, and succeeds if they already exist. */
+    if (MakeDirectory(result) != 0) {
+        TraceLog(LOG_WARNING, "PHYSFS: platformCalcPrefDir failed to create: %s", result);
+        PHYSFS_setErrorCode(PHYSFS_ERR_OS_ERROR);
+        MemFree(result);
+        return NULL;
+    }
+
     TraceLog(LOG_DEBUG, "PHYSFS: platformCalcPrefDir: %s", result);
     return result;
 }
