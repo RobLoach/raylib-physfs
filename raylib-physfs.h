@@ -256,7 +256,10 @@ bool MountPhysFS(const char* newDir, const char* mountPoint) {
 /**
  * Mounts the given file data as a mount point in PhysFS.
  *
- * @param fileData The archive data as a file buffer.
+ * The fileData buffer is not copied, so it must remain valid until the mount
+ * point is unmounted with UnmountPhysFS(), or ClosePhysFS() is called.
+ *
+ * @param fileData The archive data as a file buffer. Must remain valid while mounted.
  * @param dataSize The size of the file buffer.
  * @param newDir A filename that can represent the file data. Has to be unique. For example: data.zip
  * @param mountPoint The location in the tree that the archive will be mounted.
