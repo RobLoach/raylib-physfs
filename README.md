@@ -78,11 +78,6 @@ void SetPhysFSCallbacks(void);                                  // Set the rayli
 const char* GetPrefDirectory(const char *organization, const char *application); // Get the user's current config directory for the application.
 ```
 
-Notes:
-
-- `MountPhysFSFromMemory()` does not copy `fileData`; the buffer must remain valid until the mount is unmounted with `UnmountPhysFS()` or `ClosePhysFS()` is called.
-- On raylib 6.1+ the `data` parameter of `SaveFileDataToPhysFS()` is `const void*`; on older raylib versions it is `void*` (see `RAYLIB_PHYSFS_SAVE_DATA_CONST` in [`raylib-physfs.h`](raylib-physfs.h)).
-
 ### Raylib Platform
 
 [`physfs_platform_raylib.c`](physfs_platform_raylib.c) implements the PhysFS platform abstraction layer using raylib's own file API (`LoadFileData`, `SaveFileData`, etc.). This is useful on platforms where raylib provides a custom file I/O layer.
