@@ -163,6 +163,17 @@ int main(int argc, char *argv[]) {
         AssertEqual(missingWave.data, 0);
     }
 
+    // LoadSoundFromPhysFS()
+    {
+        // Without an audio device, the sound buffer cannot be created, so just
+        // make sure loading an existing file does not crash.
+        Sound sound = LoadSoundFromPhysFS("assets/sound.wav");
+        UnloadSound(sound);
+
+        Sound missingSound = LoadSoundFromPhysFS("MissingFile.wav");
+        AssertEqual(missingSound.stream.buffer, 0);
+    }
+
     // LoadShaderFromPhysFS()
     {
         Shader missingShader = LoadShaderFromPhysFS("MissingFile.txt", "MissingFile.txt");

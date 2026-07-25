@@ -71,6 +71,7 @@ RAYLIB_PHYSFS_DEF Image LoadImageFromPhysFS(const char* fileName);              
 RAYLIB_PHYSFS_DEF Image LoadImageAnimFromPhysFS(const char* fileName, int* frames); // Load an animated image from PhysFS (e.g. GIF)
 RAYLIB_PHYSFS_DEF Texture2D LoadTextureFromPhysFS(const char* fileName);          // Load a texture from PhysFS
 RAYLIB_PHYSFS_DEF Wave LoadWaveFromPhysFS(const char* fileName);                  // Load wave data from PhysFS
+RAYLIB_PHYSFS_DEF Sound LoadSoundFromPhysFS(const char* fileName);                // Load a sound from PhysFS
 RAYLIB_PHYSFS_DEF Music LoadMusicStreamFromPhysFS(const char* fileName);          // Load music data from PhysFS
 RAYLIB_PHYSFS_DEF Font LoadFontFromPhysFS(const char* fileName, int fontSize, int *fontChars, int charsCount);  // Load a font from PhysFS
 RAYLIB_PHYSFS_DEF Shader LoadShaderFromPhysFS(const char* vsFileName, const char* fsFileName);  // Load shader from PhysFS
@@ -448,6 +449,28 @@ Wave LoadWaveFromPhysFS(const char* fileName) {
     Wave wave = LoadWaveFromMemory(extension, fileData, bytesRead);
     UnloadFileData(fileData);
     return wave;
+}
+
+/**
+ * Load a sound from PhysFS.
+ *
+ * @param fileName The file name to load from the PhysFS mount paths.
+ *
+ * @return The Sound object, or an empty Sound object on failure.
+ *
+ * @see UnloadSound()
+ */
+Sound LoadSoundFromPhysFS(const char* fileName) {
+    Wave wave = LoadWaveFromPhysFS(fileName);
+    if (wave.data == NULL) {
+        Sound output = { 0 };
+        return output;
+    }
+
+    // Load the sound from the wave data.
+    Sound sound = LoadSoundFromWave(wave);
+    UnloadWave(wave);
+    return sound;
 }
 
 /**
