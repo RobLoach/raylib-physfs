@@ -255,7 +255,20 @@ bool MountPhysFS(const char* newDir, const char* mountPoint) {
 }
 
 /**
+ * Frees the internal copy of mounted file data when its mount point is unmounted.
+ *
+ * @internal
+ */
+static void UnmountPhysFSFromMemoryCallback(void* buf) {
+    MemFree(buf);
+}
+
+/**
  * Mounts the given file data as a mount point in PhysFS.
+ *
+ * The fileData buffer is copied internally, so it does not need to remain
+ * valid after this call. The copy is freed when the mount point is unmounted
+ * with UnmountPhysFS(), or ClosePhysFS() is called.
  *
  * @param fileData The archive data as a file buffer.
  * @param dataSize The size of the file buffer.
@@ -267,13 +280,22 @@ bool MountPhysFS(const char* newDir, const char* mountPoint) {
  * @see MountPhysFS()
  */
 bool MountPhysFSFromMemory(const unsigned char *fileData, int dataSize, const char* newDir, const char* mountPoint) {
-    if (dataSize <= 0) {
-        TraceLog(LOG_WARNING, "PHYSFS: Cannot mount a data size of 0");
+    if (fileData == NULL || dataSize <= 0) {
+        TraceLog(LOG_WARNING, "PHYSFS: Cannot mount empty file data");
         return false;
     }
 
-    if (PHYSFS_mountMemory(fileData, (PHYSFS_uint64)dataSize, NULL, newDir, mountPoint, 1) == 0) {
+    // Copy the data so the caller's buffer doesn't have to stay valid while mounted.
+    void* copy = MemAlloc((unsigned int)dataSize);
+    if (copy == NULL) {
+        TraceLog(LOG_WARNING, "PHYSFS: Failed to allocate memory to mount '%s'", newDir);
+        return false;
+    }
+    RAYLIB_PHYSFS_MEMCPY(copy, fileData, (size_t)dataSize);
+
+    if (PHYSFS_mountMemory(copy, (PHYSFS_uint64)dataSize, UnmountPhysFSFromMemoryCallback, newDir, mountPoint, 1) == 0) {
         TracePhysFSError(TextFormat("Failed to mount '%s' at '%s'", newDir, mountPoint));
+        MemFree(copy);
         return false;
     }
 
