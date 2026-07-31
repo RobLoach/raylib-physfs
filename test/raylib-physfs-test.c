@@ -35,6 +35,30 @@ int main(int argc, char *argv[]) {
     Assert(DirectoryExistsInPhysFS("assets"));
     AssertNot(DirectoryExistsInPhysFS("MissingDirectory"));
 
+    // MountPhysFSFromMemory()
+    {
+        int zipSize = 0;
+        unsigned char* zipData = LoadFileDataFromPhysFS("assets/archive.zip", &zipSize);
+        AssertNotEqual(zipData, 0);
+        Assert(MountPhysFSFromMemory(zipData, zipSize, "archive.zip", "memassets"));
+
+        // The data is copied internally, so the source buffer can be clobbered and freed.
+        for (int i = 0; i < zipSize; i++) {
+            zipData[i] = 0;
+        }
+        UnloadFileData(zipData);
+
+        char* memoryText = LoadFileTextFromPhysFS("memassets/memory.txt");
+        AssertNotEqual(memoryText, 0);
+        Assert(TextIsEqual(memoryText, "Hello from memory"));
+        UnloadFileText(memoryText);
+
+        Assert(UnmountPhysFS("archive.zip"));
+
+        // Empty data fails to mount.
+        AssertNot(MountPhysFSFromMemory(0, 0, "empty.zip", "memassets"));
+    }
+
     // LoadFileDataFromPhysFS()
     {
         int bytesRead = 0;
