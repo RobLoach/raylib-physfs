@@ -49,7 +49,7 @@ int main() {
 
 ### Music
 
-There is no `LoadMusicStreamFromPhysFS()`, as raylib streams music directly from the file buffer, which a one-call API could never free. Instead, load the file data yourself, keep it alive while the music plays, and free it after unloading the music stream.
+raylib streams music directly from the file buffer, so load the file data yourself, keep it alive while the music plays, and free it after unloading the music stream.
 
 ``` c
 int size;
