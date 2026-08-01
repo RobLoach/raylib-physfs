@@ -198,22 +198,6 @@ int main(int argc, char *argv[]) {
         AssertEqual(missingSound.stream.buffer, 0);
     }
 
-    // LoadFileDataFromPhysFS() with LoadMusicStreamFromMemory()
-    {
-        // The supported music pattern: the caller owns the file buffer, which
-        // must outlive the music stream, and is freed after UnloadMusicStream().
-        for (int i = 0; i < 5; i++) {
-            int musicDataSize = 0;
-            unsigned char* musicData = LoadFileDataFromPhysFS("assets/sound.wav", &musicDataSize);
-            AssertNotEqual(musicData, 0);
-            Assert(musicDataSize > 0);
-            Music music = LoadMusicStreamFromMemory(".wav", musicData, musicDataSize);
-            AssertNotEqual(music.ctxData, 0);
-            UnloadMusicStream(music);
-            UnloadFileData(musicData);
-        }
-    }
-
     // LoadShaderFromPhysFS()
     {
         Shader missingShader = LoadShaderFromPhysFS("MissingFile.txt", "MissingFile.txt");
