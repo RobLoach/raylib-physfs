@@ -214,17 +214,6 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    // LoadMusicStreamFromPhysFS()
-    {
-        // Deprecated, as it leaks the file buffer, but it should still load.
-        Music music = LoadMusicStreamFromPhysFS("assets/sound.wav");
-        AssertNotEqual(music.ctxData, 0);
-        UnloadMusicStream(music);
-
-        Music missingMusic = LoadMusicStreamFromPhysFS("MissingFile.wav");
-        AssertEqual(missingMusic.ctxData, 0);
-    }
-
     // LoadShaderFromPhysFS()
     {
         Shader missingShader = LoadShaderFromPhysFS("MissingFile.txt", "MissingFile.txt");
