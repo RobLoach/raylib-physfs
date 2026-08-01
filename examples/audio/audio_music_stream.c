@@ -29,7 +29,10 @@ int main(void)
     InitPhysFS();
     MountPhysFS("resources", "res");
 
-    Music music = LoadMusicStreamFromPhysFS("res/country.mp3");
+    // Load the music file data manually, as the buffer must stay valid while the music plays.
+    int musicDataSize = 0;
+    unsigned char *musicData = LoadFileDataFromPhysFS("res/country.mp3", &musicDataSize);
+    Music music = LoadMusicStreamFromMemory(".mp3", musicData, musicDataSize);
 
     PlayMusicStream(music);
 
@@ -90,6 +93,7 @@ int main(void)
     // De-Initialization
     //--------------------------------------------------------------------------------------
     UnloadMusicStream(music);   // Unload music stream buffers from RAM
+    UnloadFileData(musicData);  // Free the music file data after the stream is unloaded
 
     CloseAudioDevice();         // Close audio device (music streaming is automatically stopped)
 

@@ -47,6 +47,19 @@ int main() {
 }
 ```
 
+### Music
+
+`LoadMusicStreamFromPhysFS()` is deprecated, as raylib streams music directly from the file buffer, which this one-call API can never free. Instead, load the file data yourself, keep it alive while the music plays, and free it after unloading the music stream.
+
+``` c
+int size;
+unsigned char *data = LoadFileDataFromPhysFS("assets/music.ogg", &size);
+Music music = LoadMusicStreamFromMemory(".ogg", data, size);
+// ... play the music ...
+UnloadMusicStream(music);
+UnloadFileData(data);   // Free the buffer only after unloading the music stream.
+```
+
 ### API
 
 ``` c
@@ -72,7 +85,7 @@ Image LoadImageAnimFromPhysFS(const char* fileName, int* frames);  // Load an an
 Texture2D LoadTextureFromPhysFS(const char* fileName);          // Load a texture from PhysFS
 Wave LoadWaveFromPhysFS(const char* fileName);                  // Load wave data from PhysFS
 Sound LoadSoundFromPhysFS(const char* fileName);                // Load a sound from PhysFS
-Music LoadMusicStreamFromPhysFS(const char* fileName);          // Load music data from PhysFS
+Music LoadMusicStreamFromPhysFS(const char* fileName);          // Load music data from PhysFS (DEPRECATED: leaks the file buffer by design; use LoadFileDataFromPhysFS() with LoadMusicStreamFromMemory(), and UnloadFileData() after UnloadMusicStream())
 Font LoadFontFromPhysFS(const char* fileName, int fontSize, int *fontChars, int charsCount);  // Load a font from PhysFS
 Shader LoadShaderFromPhysFS(const char* vsFileName, const char* fsFileName);  // Load shader from PhysFS
 void SetPhysFSCallbacks(void);                                  // Set the raylib file loader/saver callbacks to use PhysFS

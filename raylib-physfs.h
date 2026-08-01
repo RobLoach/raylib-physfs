@@ -72,7 +72,7 @@ RAYLIB_PHYSFS_DEF Image LoadImageAnimFromPhysFS(const char* fileName, int* frame
 RAYLIB_PHYSFS_DEF Texture2D LoadTextureFromPhysFS(const char* fileName);          // Load a texture from PhysFS
 RAYLIB_PHYSFS_DEF Wave LoadWaveFromPhysFS(const char* fileName);                  // Load wave data from PhysFS
 RAYLIB_PHYSFS_DEF Sound LoadSoundFromPhysFS(const char* fileName);                // Load a sound from PhysFS
-RAYLIB_PHYSFS_DEF Music LoadMusicStreamFromPhysFS(const char* fileName);          // Load music data from PhysFS
+RAYLIB_PHYSFS_DEF Music LoadMusicStreamFromPhysFS(const char* fileName);          // Load music data from PhysFS (DEPRECATED: leaks the file buffer by design; use LoadFileDataFromPhysFS() with LoadMusicStreamFromMemory(), and UnloadFileData() after UnloadMusicStream())
 RAYLIB_PHYSFS_DEF Font LoadFontFromPhysFS(const char* fileName, int fontSize, int *fontChars, int charsCount);  // Load a font from PhysFS
 RAYLIB_PHYSFS_DEF Shader LoadShaderFromPhysFS(const char* vsFileName, const char* fsFileName);  // Load shader from PhysFS
 RAYLIB_PHYSFS_DEF void SetPhysFSCallbacks(void);                                      // Set the raylib file loader/saver callbacks to use PhysFS
@@ -498,10 +498,19 @@ Sound LoadSoundFromPhysFS(const char* fileName) {
 /**
  * Load module music from PhysFS.
  *
+ * @deprecated This function leaks the loaded file buffer by design: raylib's
+ * music decoders stream directly from the buffer, so it has to stay valid for
+ * as long as the music plays, and there is no way to free it afterwards.
+ * Instead, load the file with LoadFileDataFromPhysFS(), pass it to
+ * LoadMusicStreamFromMemory(), and free the buffer with UnloadFileData()
+ * after UnloadMusicStream().
+ *
  * @param fileName The file name to load from the PhysFS mount paths.
  *
  * @return The Music object, or an empty Music object on failure.
  *
+ * @see LoadFileDataFromPhysFS()
+ * @see LoadMusicStreamFromMemory()
  * @see UnloadMusic()
  */
 Music LoadMusicStreamFromPhysFS(const char* fileName) {
