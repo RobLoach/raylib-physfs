@@ -72,7 +72,6 @@ RAYLIB_PHYSFS_DEF Image LoadImageAnimFromPhysFS(const char* fileName, int* frame
 RAYLIB_PHYSFS_DEF Texture2D LoadTextureFromPhysFS(const char* fileName);          // Load a texture from PhysFS
 RAYLIB_PHYSFS_DEF Wave LoadWaveFromPhysFS(const char* fileName);                  // Load wave data from PhysFS
 RAYLIB_PHYSFS_DEF Sound LoadSoundFromPhysFS(const char* fileName);                // Load a sound from PhysFS
-RAYLIB_PHYSFS_DEF Music LoadMusicStreamFromPhysFS(const char* fileName);          // Load music data from PhysFS
 RAYLIB_PHYSFS_DEF Font LoadFontFromPhysFS(const char* fileName, int fontSize, int *fontChars, int charsCount);  // Load a font from PhysFS
 RAYLIB_PHYSFS_DEF Shader LoadShaderFromPhysFS(const char* vsFileName, const char* fsFileName);  // Load shader from PhysFS
 RAYLIB_PHYSFS_DEF void SetPhysFSCallbacks(void);                                      // Set the raylib file loader/saver callbacks to use PhysFS
@@ -493,35 +492,6 @@ Sound LoadSoundFromPhysFS(const char* fileName) {
     Sound sound = LoadSoundFromWave(wave);
     UnloadWave(wave);
     return sound;
-}
-
-/**
- * Load module music from PhysFS.
- *
- * @param fileName The file name to load from the PhysFS mount paths.
- *
- * @return The Music object, or an empty Music object on failure.
- *
- * @see UnloadMusic()
- */
-Music LoadMusicStreamFromPhysFS(const char* fileName) {
-    int bytesRead;
-    unsigned char* fileData = LoadFileDataFromPhysFS(fileName, &bytesRead);
-    if (bytesRead == 0) {
-        Music output = { 0 };
-        return output;
-    }
-
-    // Load from the memory.
-    const char* extension = GetFileExtension(fileName);
-    Music music = LoadMusicStreamFromMemory(extension, fileData, bytesRead);
-
-    // Unload the file data if the music failed to load.
-    if (music.ctxData == NULL) {
-        UnloadFileData(fileData);
-    }
-
-    return music;
 }
 
 /**
